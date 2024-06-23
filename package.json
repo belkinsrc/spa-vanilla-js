@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "route-parser": "^0.0.5",
     "vite": "^5.3.1"
   }
 }
