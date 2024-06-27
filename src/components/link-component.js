@@ -1,6 +1,6 @@
 import { goTo } from '@/router';
 
-class Link extends HTMLElement {
+class LinkComponent extends HTMLElement {
   constructor() {
     super();
 
@@ -31,7 +31,7 @@ class Link extends HTMLElement {
   connectedCallback() {
     const shadow = this.shadowRoot;
     const href = this.getAttribute('href');
-    const text = this.textContent;
+    const text = this.getAttribute('text');
     const link = shadow.querySelector('a');
     link.textContent = text;
     link.setAttribute('href', href);
@@ -77,4 +77,4 @@ class Link extends HTMLElement {
   }
 }
 
-customElements.define('link-component', Link);
+customElements.define('nav-link', LinkComponent);

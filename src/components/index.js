@@ -1,1 +1,2 @@
-import './link';
+import './link-component';
+import './nav-component';

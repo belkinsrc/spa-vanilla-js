@@ -1,6 +1,4 @@
+<main-nav type="user"></main-nav>
 <div>
-Users Template
-<link-component href="/">Main</link-component>
-  <link-component href="/posts">Posts</link-component>
-  <link-component href="/users">Users</link-component>
+  Users Template
 </div>
