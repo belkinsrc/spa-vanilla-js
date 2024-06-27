@@ -6,19 +6,19 @@ class LinkComponent extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
     const link = document.createElement('a');
+    link.setAttribute('class', 'main-link');
     const style = document.createElement('style');
     this.selected = false;
 
     style.textContent = `
-      a {
+      .main-link {
         padding: 5px;
         margin: 5px 5px 5px 0;
-        text-decoration: none;
         background-color: #ddd;
         color: #333;
       }
 
-      a:hover {
+      .main-link:hover {
         background-color: #666;
         color: #eee;
         text-decoration: none;
@@ -32,7 +32,7 @@ class LinkComponent extends HTMLElement {
     const shadow = this.shadowRoot;
     const href = this.getAttribute('href');
     const text = this.getAttribute('text');
-    const link = shadow.querySelector('a');
+    const link = shadow.querySelector('.main-link');
     link.textContent = text;
     link.setAttribute('href', href);
     link.addEventListener('click', this.handleClick);
@@ -64,7 +64,7 @@ class LinkComponent extends HTMLElement {
       const shadow = this.shadowRoot;
       const style = shadow.querySelector('style'); 
       style.textContent = `
-        a {
+        .main-link {
           padding: 5px;
           margin: 5px 5px 5px 0;
           text-decoration: none;

@@ -1,4 +1,6 @@
-<main-nav type="post"></main-nav>
+<main-nav type="post">
+  <nav-link></nav-link>
+</main-nav>
 <div>
   Main Template
 </div>
