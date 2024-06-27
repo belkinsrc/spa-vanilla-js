@@ -1,4 +1,4 @@
-import appConstants from '@/common/constants';
+import appConstants from '@/common';
 import Route from 'route-parser';
 
 import MainPage from '@/pages/main.template';

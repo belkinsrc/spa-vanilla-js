@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "route-parser": "^0.0.5",
+    "sass": "^1.77.6",
     "vite": "^5.3.1"
   }
 }

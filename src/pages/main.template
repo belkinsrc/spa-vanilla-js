@@ -1,1 +1,6 @@
-<div>Main Template</div>
+<div>
+  Main Template
+  <link-component href="/">Main</link-component>
+  <link-component href="/posts">Posts</link-component>
+  <link-component href="/users">Users</link-component>
+</div>
