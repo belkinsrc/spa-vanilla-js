@@ -5,11 +5,11 @@ class NavComponent extends HTMLElement {
     super();
 
     this.searchType = appConstants.search.types.post;
-    this.links = [
-      { href: appConstants.routes.index },
-      { href: appConstants.routes.posts },
-      { href: appConstants.routes.users },
-    ];
+    // this.links = [
+    //   { href: appConstants.routes.index },
+    //   { href: appConstants.routes.posts },
+    //   { href: appConstants.routes.users },
+    // ];
 
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
@@ -40,19 +40,6 @@ class NavComponent extends HTMLElement {
     `;
   }
 
-  updateSearch() {
-    const shadow = this.shadowRoot;
-    const input = shadow.querySelector('input');
-    const search = this.getAttribute('search');
-    input.value = search;
-
-    if (this.searchType === appConstants.search.types.post) {
-      input.setAttribute('placeholder', 'Search post...');
-    } else if (this.searchType === appConstants.search.types.users) {
-      input.setAttribute('placeholder', 'Search user...');
-    }
-  }
-
   connectedCallback() {
     const shadow = this.shadowRoot;
 
@@ -73,17 +60,16 @@ class NavComponent extends HTMLElement {
       : appConstants.search.types.post;
 
     if (searchText) {
-      const input = shadow.querySelector('.global-search');
-      input.value = searchText;
+      searchInput.value = searchText;
     }
 
     const { pathname: path } = new URL(window.location.href);
-    const currentLink = this.links.find((link) => link.href === path);
-
-    if (currentLink) {
-      const currentLinkElement = shadow.querySelector(`.${currentLink.class}`);
-      currentLinkElement.setAttribute('selected', 'true');
-    }
+    const slot = shadow.querySelector('slot');
+    const elementsInsideSlots = slot.assignedElements();
+    const currentLinkElement = elementsInsideSlots.find(
+      (link) => link.getAttribute('href') === path
+    );
+    currentLinkElement.setAttribute('selected', 'true');
   }
 
   static get observedAttributes() {
@@ -93,6 +79,19 @@ class NavComponent extends HTMLElement {
   attributeChangedCallback(name) {
     if (name === 'search' || name === 'type') {
       this.updateSearch();
+    }
+  }
+
+  updateSearch() {
+    const shadow = this.shadowRoot;
+    const input = shadow.querySelector('input');
+    const search = this.getAttribute('search');
+    input.value = search;
+
+    if (this.searchType === appConstants.search.types.post) {
+      input.setAttribute('placeholder', 'Search post...');
+    } else if (this.searchType === appConstants.search.types.user) {
+      input.setAttribute('placeholder', 'Search user...');
     }
   }
 }

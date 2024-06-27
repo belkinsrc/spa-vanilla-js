@@ -5,48 +5,34 @@ class LinkComponent extends HTMLElement {
     super();
 
     const shadow = this.attachShadow({ mode: 'open' });
-    const link = document.createElement('a');
-    link.setAttribute('class', 'main-link');
-    const style = document.createElement('style');
-    this.selected = false;
 
-    style.textContent = `
-      .main-link {
-        padding: 5px;
-        margin: 5px 5px 5px 0;
-        background-color: #ddd;
-        color: #333;
-      }
+    shadow.innerHTML = `
+      <style>
+        .main-link {
+          padding: 5px;
+          margin: 5px 5px 5px 0;
+          background-color: #ddd;
+          color: #333;
+        }
 
-      .main-link:hover {
-        background-color: #666;
-        color: #eee;
-        text-decoration: none;
-      }
+        .main-link:hover {
+          background-color: #666;
+          color: #eee;
+          text-decoration: none;
+        }
+      </style>
+      <a class="main-link">
+        <slot></slot>
+      </a>
     `;
-    shadow.appendChild(style);
-    shadow.appendChild(link);
   }
 
   connectedCallback() {
     const shadow = this.shadowRoot;
     const href = this.getAttribute('href');
-    const text = this.getAttribute('text');
     const link = shadow.querySelector('.main-link');
-    link.textContent = text;
-    link.setAttribute('href', href);
-    link.addEventListener('click', this.handleClick);
-  }
-
-  handleClick(e) {
-    e.preventDefault();
-
-    if (!this.selected) {
-      const { pathname: path } = new URL(e.target.href);
-      goTo(path);
-      this.selected = true;
-      this.setAttribute('selected', this.selected);
-    }
+    link.setAttribute('href', href ?? '#');
+    link.addEventListener('click', this.handleClick.bind(this));
   }
 
   static get observedAttributes() {
@@ -59,10 +45,24 @@ class LinkComponent extends HTMLElement {
     }
   }
 
+  handleClick(e) {
+    e.preventDefault();
+
+    const isSelected = this.getAttribute('selected');
+    if (!isSelected) {
+      const chainOfParentsOfTargetElement = e.composedPath();
+      const targetElement = chainOfParentsOfTargetElement.find((element) =>
+        element.classList.contains('main-link')
+    );
+    const { pathname: path } = new URL(targetElement.href);
+    goTo(path);
+    }
+  }
+
   updateStyle(isSelected) {
     if (isSelected) {
       const shadow = this.shadowRoot;
-      const style = shadow.querySelector('style'); 
+      const style = shadow.querySelector('style');
       style.textContent = `
         .main-link {
           padding: 5px;
