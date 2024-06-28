@@ -54,14 +54,14 @@ class NavComponent extends HTMLElement {
       }
     });
 
-    const searchText = this.getAttribute('search');
+    // const searchText = this.getAttribute('search');
     this.searchType = this.getAttribute('type')
       ? this.getAttribute('type')
       : appConstants.search.types.post;
-
-    if (searchText) {
-      searchInput.value = searchText;
-    }
+    // if (searchText) {
+    //   searchInput.value = searchText;
+    // }
+    this.setSearchPlaceholder();
 
     const { pathname: path } = new URL(window.location.href);
     const slot = shadow.querySelector('slot');
@@ -77,16 +77,16 @@ class NavComponent extends HTMLElement {
   }
 
   attributeChangedCallback(name) {
-    if (name === 'search' || name === 'type') {
-      this.updateSearch();
+    if (name === 'search') {
+      // this.updateSearch();
     }
   }
 
-  updateSearch() {
+  setSearchPlaceholder() {
     const shadow = this.shadowRoot;
     const input = shadow.querySelector('input');
-    const search = this.getAttribute('search');
-    input.value = search;
+    // const search = this.getAttribute('search');
+    // input.value = search;
 
     if (this.searchType === appConstants.search.types.post) {
       input.setAttribute('placeholder', 'Search post...');
