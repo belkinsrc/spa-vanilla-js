@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "json-server --port 1111 ./public/db.json"
   },
   "devDependencies": {
     "route-parser": "^0.0.5",
