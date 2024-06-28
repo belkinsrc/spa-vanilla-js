@@ -11,3 +11,9 @@ export const getUserById = (id) => {
 export const getUsersSearch = (search, page) => {
   return baseApi.get(`/users?q=${search}&_page=${page}&_limit=10`);
 };
+
+export default {
+  getUsers,
+  getUserById,
+  getUsersSearch,
+};

@@ -17,3 +17,10 @@ export const getPostById = (id) => {
 export const getPostsSearch = (search, page) => {
   return baseApi.get(`/posts?q=${search}&_page=${page}&_limit=10&_expand=user`);
 };
+
+export default {
+  getPosts,
+  getPostsByUser,
+  getPostById,
+  getPostsSearch,
+};
