@@ -10,8 +10,8 @@ export const getPostsByUser = (userId, page) => {
   );
 };
 
-export const getPostById = (postId) => {
-  return baseApi.get(`/posts?postId=${postId}&_expand=user`);
+export const getPostById = (id) => {
+  return baseApi.get(`/posts?postId=${id}&_expand=user`);
 };
 
 export const getPostsSearch = (search, page) => {
