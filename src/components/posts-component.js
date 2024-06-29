@@ -51,7 +51,7 @@ class PostsComponent extends HTMLElement {
 
     paginationElement.addEventListener('paginate-forward', (e) => {
       e.stopPropagation();
-      
+
       if (!this.lastPage) {
         this.page = this.page + 1;
         this.getPostsPage();
@@ -86,6 +86,10 @@ class PostsComponent extends HTMLElement {
     const shadow = this.shadowRoot;
     const postsContainer = shadow.querySelector('.posts');
     postsContainer.innerHTML = '';
+    
+    const paginationElement = shadow.querySelector('pagination-component');
+    paginationElement.setAttribute('page', this.page);
+    paginationElement.setAttribute('last', this.lastPage);
 
     const apiCall = postsApi.getPosts(this.page);
     apiCall
