@@ -29,6 +29,28 @@ class PaginationComponent extends HTMLElement {
   }
 
   connectedCallback() {
+    const shadow = this.shadowRoot;
+    const btnPrev = shadow.querySelector('[data-btn-prev]');
+    const btnNext = shadow.querySelector('[data-btn-next]');
+
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      if (this.page > 1) {
+        const paginateBackEvent = new CustomEvent('paginate-back');
+        this.dispatchEvent(paginateBackEvent);
+      }
+    });
+
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      if (!this.lastPage) {
+        const paginateForwardEvent = new CustomEvent('paginate-forward');
+        this.dispatchEvent(paginateForwardEvent);
+      }
+    });
+
     this.updateComponent();
   }
 
@@ -53,24 +75,6 @@ class PaginationComponent extends HTMLElement {
     const pageLabel = shadow.querySelector('.posts-pagination__label');
 
     pageLabel.textContent = `Page ${this.page}`;
-
-    btnPrev.addEventListener('click', (e) => {
-      e.stopPropagation();
-
-      if (this.page > 1) {
-        const paginateBackEvent = new CustomEvent('paginate-back');
-        this.dispatchEvent(paginateBackEvent);
-      }
-    });
-
-    btnNext.addEventListener('click', (e) => {
-      e.stopPropagation();
-
-      if (!this.lastPage) {
-        const paginateForwardEvent = new CustomEvent('paginate-forward');
-        this.dispatchEvent(paginateForwardEvent);
-      }
-    });
 
     if (this.page === 1) {
       btnPrev.setAttribute('disabled', 'true');
