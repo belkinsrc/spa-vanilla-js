@@ -1,4 +1,4 @@
-import { appUtils } from '../common';
+import { appUtils } from '@/common';
 
 class UserAvatarComponent extends HTMLElement {
   constructor() {
@@ -52,7 +52,7 @@ class UserAvatarComponent extends HTMLElement {
     if (name === 'small') {
       this.small = JSON.parse(newValue);
     } else if (name === 'user-name') {
-      this.text = JSON.parse(newValue);
+      this.text = newValue;
     }
     this.updateComponent();
   }

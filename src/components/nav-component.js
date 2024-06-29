@@ -1,4 +1,4 @@
-import appConstants from '@/common';
+import { appConstants } from '@/common';
 
 class NavComponent extends HTMLElement {
   constructor() {

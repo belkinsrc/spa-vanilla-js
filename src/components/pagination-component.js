@@ -33,14 +33,17 @@ class PaginationComponent extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['page'];
+    return ['page', 'last'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'page') {
       this.page = JSON.parse(newValue);
-      this.updateComponent();
     }
+    if (name === 'last') {
+      this.lastPage = JSON.parse(newValue);
+    }
+    this.updateComponent();
   }
 
   updateComponent() {

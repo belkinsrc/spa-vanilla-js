@@ -62,4 +62,5 @@ export default {
   randomColor,
   invertColor,
   getUserInitials,
+  highlightText,
 };

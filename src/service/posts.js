@@ -5,7 +5,7 @@ export const getPost = (id) => {
 };
 
 export const setPost = (post) => {
-  post.set(post.id, post);
+  posts.set(post.id, post);
 };
 
 export default {
