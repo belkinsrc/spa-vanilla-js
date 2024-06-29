@@ -43,7 +43,7 @@ class PostsComponent extends HTMLElement {
     paginationElement.addEventListener('paginate-back', (e) => {
       e.stopPropagation();
 
-      if (this.age > 1) {
+      if (this.page > 1) {
         this.page = this.page - 1;
         this.getPostsPage();
       }
@@ -86,7 +86,7 @@ class PostsComponent extends HTMLElement {
     const shadow = this.shadowRoot;
     const postsContainer = shadow.querySelector('.posts');
     postsContainer.innerHTML = '';
-    
+
     const paginationElement = shadow.querySelector('pagination-component');
     paginationElement.setAttribute('page', this.page);
     paginationElement.setAttribute('last', this.lastPage);

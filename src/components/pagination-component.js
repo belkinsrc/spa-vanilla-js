@@ -35,7 +35,7 @@ class PaginationComponent extends HTMLElement {
 
     btnPrev.addEventListener('click', (e) => {
       e.stopPropagation();
-
+      
       if (this.page > 1) {
         const paginateBackEvent = new CustomEvent('paginate-back');
         this.dispatchEvent(paginateBackEvent);
@@ -76,11 +76,16 @@ class PaginationComponent extends HTMLElement {
 
     pageLabel.textContent = `Page ${this.page}`;
 
-    if (this.page === 1) {
+    if (this.page <= 1) {
       btnPrev.setAttribute('disabled', 'true');
+    } else {
+      btnPrev.removeAttribute('disabled');
     }
+
     if (this.lastPage) {
       btnNext.setAttribute('disabled', 'true');
+    } else {
+      btnNext.removeAttribute('disabled');
     }
   }
 }
