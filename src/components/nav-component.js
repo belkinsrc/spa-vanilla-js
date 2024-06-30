@@ -1,15 +1,11 @@
 import { appConstants } from '@/common';
+import { goTo, routes } from '../router';
 
 class NavComponent extends HTMLElement {
   constructor() {
     super();
 
     this.searchType = appConstants.search.types.post;
-    // this.links = [
-    //   { href: appConstants.routes.index },
-    //   { href: appConstants.routes.posts },
-    //   { href: appConstants.routes.users },
-    // ];
 
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
@@ -44,26 +40,31 @@ class NavComponent extends HTMLElement {
     const shadow = this.shadowRoot;
 
     const searchInput = shadow.querySelector('.global-search');
+    const searchText = this.getAttribute('search');
+    this.searchType = this.getAttribute('type')
+      ? this.getAttribute('type')
+      : appConstants.search.types.post;
+    if (searchText) {
+      searchInput.value = searchText;
+    }
+
     searchInput.addEventListener('keyup', (e) => {
       e.stopPropagation();
 
       if (e.key === 'Enter') {
         e.preventDefault();
         const text = e.target.value;
-        console.log('search', text);
+        if (text.trim()) {
+          if (this.searchType === appConstants.search.types.post) {
+            const url = routes.PostsSearch.reverse({ query: text });
+            goTo(url);
+          }
+        }
       }
     });
 
-    // const searchText = this.getAttribute('search');
-    this.searchType = this.getAttribute('type')
-      ? this.getAttribute('type')
-      : appConstants.search.types.post;
-    // if (searchText) {
-    //   searchInput.value = searchText;
-    // }
-    this.setSearchPlaceholder();
-
-    const { pathname: path } = new URL(window.location.href);
+    const { pathname } = new URL(window.location.href);
+    const path = this.getPathOfCurrentPage(pathname);
     const slot = shadow.querySelector('slot');
     const elementsInsideSlots = slot.assignedElements();
     const currentLinkElement = elementsInsideSlots.find(
@@ -76,23 +77,32 @@ class NavComponent extends HTMLElement {
     return ['search', 'type'];
   }
 
-  attributeChangedCallback(name) {
+  attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'search') {
-      // this.updateSearch();
+      this.updateSearch();
+    }
+    if (name === 'type') {
+      this.searchType = newValue;
+      this.updateSearch();
     }
   }
 
-  setSearchPlaceholder() {
+  updateSearch() {
     const shadow = this.shadowRoot;
     const input = shadow.querySelector('input');
-    // const search = this.getAttribute('search');
-    // input.value = search;
+    const searchText = this.getAttribute('search');
+    input.value = searchText;
 
     if (this.searchType === appConstants.search.types.post) {
       input.setAttribute('placeholder', 'Search post...');
     } else if (this.searchType === appConstants.search.types.user) {
       input.setAttribute('placeholder', 'Search user...');
     }
+  }
+
+  getPathOfCurrentPage(path) {
+    const partialsPath = path.split('/').find((partial) => partial);
+    return partialsPath ? `/${partialsPath}` : '/';
   }
 }
 

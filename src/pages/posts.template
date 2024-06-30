@@ -1,4 +1,4 @@
-<main-nav type="post">
+<main-nav type="post" search="${props.query || ''}">
   <nav-link href="/">Main</nav-link>
   <nav-link href="/posts">Posts</nav-link>
   <nav-link href="/users">Users</nav-link>
