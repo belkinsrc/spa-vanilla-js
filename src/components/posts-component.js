@@ -58,40 +58,52 @@ class PostsComponent extends HTMLElement {
       }
     });
 
-    // const userId = this.getAttribute('user');
-    // const search = this.getAttribute('search');
-
     this.updateComponent();
   }
 
   updateComponent() {
     const shadow = this.shadowRoot;
+    const userId = this.getAttribute('user');
+    const search = this.getAttribute('search');
     const title = shadow.querySelector('.section-title');
     title.textContent = 'All posts';
-
+    if (userId) {
+      title.textContent = 'Users posts';
+    }
+    if (search) {
+      this.search = search;
+    }
     this.getPostsPage();
   }
 
-  // static get observedAttributes() {
-  //   return ['search'];
-  // }
+  static get observedAttributes() {
+    return ['search'];
+  }
 
-  // attributeChangedCallback(name, oldValue, newValue) {
-  //   if (name === 'search') {
-  //     this.search = JSON.parse(newValue);
-  //   }
-  // }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'search') {
+      this.search = newValue;
+      this.getPostsPage();
+    }
+  }
 
   getPostsPage() {
     const shadow = this.shadowRoot;
     const postsContainer = shadow.querySelector('.posts');
     postsContainer.innerHTML = '';
 
+    const userId = this.getAttribute('user');
+
     const paginationElement = shadow.querySelector('pagination-component');
     paginationElement.setAttribute('page', this.page);
     paginationElement.setAttribute('last', this.lastPage);
 
-    const apiCall = postsApi.getPosts(this.page);
+    const apiCall = this.search
+      ? postsApi.getPostsSearch(this.search, this.page)
+      : userId
+      ? postsApi.getPostsByUser(userId, this.page)
+      : postsApi.getPosts(this.page);
+
     apiCall
       .then((posts) => {
         this.lastPage = posts.length < 10;
@@ -99,6 +111,9 @@ class PostsComponent extends HTMLElement {
           cache.setPost(post);
           const postElement = document.createElement('post-component');
           postElement.setAttribute('id', post.id);
+          if (this.search) {
+            postElement.setAttribute('search', this.search);
+          }
           postsContainer.appendChild(postElement);
         });
       })

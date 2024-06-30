@@ -55,16 +55,16 @@ class PostComponent extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.shadowRoot;
-    const id = this.getAttribute('id'); // need to check
-    const search = this.getAttribute('search'); // need to check
-    const post = cache.getPost(id); // need to check
+    const id = this.getAttribute('id');
+    const search = this.getAttribute('search');
+    const post = cache.getPost(id);
 
     const titleElement = shadow.querySelector('.post__title');
     titleElement.textContent = post.title;
     const textElement = shadow.querySelector('.post__text');
 
     if (search) {
-      textElement.textContent = appUtils.highlightText(post.text, search);
+      textElement.innerHTML = appUtils.highlightText(post.text, search);
     } else {
       textElement.textContent = post.text;
     }
