@@ -1,5 +1,5 @@
 import { appUtils } from '@/common';
-import { cache } from '@/service';
+import { cachePosts } from '@/service';
 
 class PostComponent extends HTMLElement {
   constructor() {
@@ -57,7 +57,7 @@ class PostComponent extends HTMLElement {
     const shadow = this.shadowRoot;
     const id = this.getAttribute('id');
     const search = this.getAttribute('search');
-    const post = cache.getPost(id);
+    const post = cachePosts.getPost(id);
 
     const titleElement = shadow.querySelector('.post__title');
     titleElement.textContent = post.title;

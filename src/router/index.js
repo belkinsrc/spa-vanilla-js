@@ -10,6 +10,7 @@ export const routes = {
   Posts: new Route(appConstants.routes.posts),
   PostsSearch: new Route(appConstants.routes.postsSearch),
   Users: new Route(appConstants.routes.users),
+  UsersSearch: new Route(appConstants.routes.usersSearch),
 };
 
 export const render = (path) => {
@@ -23,6 +24,8 @@ export const render = (path) => {
     result = PostsPage(routes.PostsSearch.match(path));
   } else if (routes.Users.match(path)) {
     result = UsersPage();
+  } else if (routes.UsersSearch.match(path)) {
+    result = UsersPage(routes.UsersSearch.match(path));
   }
   document.getElementById('app').innerHTML = result;
 };

@@ -58,6 +58,9 @@ class NavComponent extends HTMLElement {
           if (this.searchType === appConstants.search.types.post) {
             const url = routes.PostsSearch.reverse({ query: text });
             goTo(url);
+          } else if (this.searchType === appConstants.search.types.user) {
+            const url = routes.UsersSearch.reverse({ query: text });
+            goTo(url);
           }
         }
       }
