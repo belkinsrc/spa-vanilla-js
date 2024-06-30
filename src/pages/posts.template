@@ -4,5 +4,5 @@
   <nav-link href="/users">Users</nav-link>
 </main-nav>
 <div>
-  <posts-component search="${props.query || ''}">Posts Template</posts-component>
+  <list-component type-list="post" search="${props.query || ''}">Posts Template</list-component>
 </div>

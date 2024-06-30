@@ -1,18 +1,22 @@
-import { cache } from '@/service';
+import { appConstants } from '@/common';
+import { cachePosts } from '@/service';
+import { cacheUsers } from '@/service';
 import { postsApi } from '@/api';
+import { usersApi } from '@/api';
 
-class PostsComponent extends HTMLElement {
+class ListComponent extends HTMLElement {
   constructor() {
     super();
 
     this.page = 1;
     this.search = '';
     this.lastPage = false;
+    this.typeList = appConstants.lists.types.post;
     const shadow = this.attachShadow({ mode: 'open' });
 
     shadow.innerHTML = `
       <style>
-        .posts {
+        .content-list {
           display: flex;
           align-items: flex-start;
           justify-content: center;
@@ -29,7 +33,7 @@ class PostsComponent extends HTMLElement {
       </style>
       <h1 class="section-title"></h1>
       <pagination-component class="pagination"></pagination-component>
-      <div class="posts"></div>
+      <div class="content-list"></div>
     `;
   }
 
@@ -45,7 +49,12 @@ class PostsComponent extends HTMLElement {
 
       if (this.page > 1) {
         this.page = this.page - 1;
-        this.getPostsPage();
+
+        if (this.typeList === appConstants.lists.types.post) {
+          this.getPostsPage();
+        } else if (this.typeList === appConstants.lists.types.user) {
+          this.getUsersPage();
+        }
       }
     });
 
@@ -54,10 +63,14 @@ class PostsComponent extends HTMLElement {
 
       if (!this.lastPage) {
         this.page = this.page + 1;
-        this.getPostsPage();
+
+        if (this.typeList === appConstants.lists.types.post) {
+          this.getPostsPage();
+        } else if (this.typeList === appConstants.lists.types.user) {
+          this.getUsersPage();
+        }
       }
     });
-
     this.updateComponent();
   }
 
@@ -66,30 +79,45 @@ class PostsComponent extends HTMLElement {
     const userId = this.getAttribute('user');
     const search = this.getAttribute('search');
     const title = shadow.querySelector('.section-title');
-    title.textContent = 'All posts';
-    if (userId) {
-      title.textContent = 'Users posts';
-    }
+
     if (search) {
       this.search = search;
     }
-    this.getPostsPage();
+
+    if (this.typeList === appConstants.lists.types.post) {
+      title.textContent = 'All posts';
+      if (userId) {
+        title.textContent = 'Users posts';
+      }
+    } else if (this.typeList === appConstants.lists.types.user) {
+      title.textContent = 'All users';
+    }
+
+    if (this.typeList === appConstants.lists.types.post) {
+      this.getPostsPage();
+    } else if (this.typeList === appConstants.lists.types.user) {
+      this.getUsersPage();
+    }
   }
 
   static get observedAttributes() {
-    return ['search'];
+    return ['search', 'type-list'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'search') {
       this.search = newValue;
-      this.getPostsPage();
+      this.updateComponent();
+    }
+    if (name === 'type-list') {
+      this.typeList = newValue;
+      this.updateComponent();
     }
   }
 
   getPostsPage() {
     const shadow = this.shadowRoot;
-    const postsContainer = shadow.querySelector('.posts');
+    const postsContainer = shadow.querySelector('.content-list');
     postsContainer.innerHTML = '';
 
     const userId = this.getAttribute('user');
@@ -108,7 +136,7 @@ class PostsComponent extends HTMLElement {
       .then((posts) => {
         this.lastPage = posts.length < 10;
         posts.forEach((post) => {
-          cache.setPost(post);
+          cachePosts.setPost(post);
           const postElement = document.createElement('post-component');
           postElement.setAttribute('id', post.id);
           if (this.search) {
@@ -119,6 +147,35 @@ class PostsComponent extends HTMLElement {
       })
       .catch((error) => console.error(error));
   }
+
+  getUsersPage() {
+    const shadow = this.shadowRoot;
+    const usersContainer = shadow.querySelector('.content-list');
+    usersContainer.innerHTML = '';
+
+    const paginationElement = shadow.querySelector('pagination-component');
+    paginationElement.setAttribute('page', this.page);
+    paginationElement.setAttribute('last', this.lastPage);
+
+    const apiCall = this.search
+      ? usersApi.getUsersSearch(this.search, this.page)
+      : usersApi.getUsers(this.page);
+
+    apiCall
+      .then((users) => {
+        this.lastPage = users.length < 10;
+        users.forEach((user) => {
+          cacheUsers.setUser(user);
+          const userElement = document.createElement('user-component');
+          userElement.setAttribute('id', user.id);
+          if (this.search) {
+            userElement.setAttribute('search', this.search);
+          }
+          usersContainer.appendChild(userElement);
+        });
+      })
+      .catch((error) => console.error(error));
+  }
 }
 
-customElements.define('posts-component', PostsComponent);
+customElements.define('list-component', ListComponent);
