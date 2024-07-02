@@ -73,7 +73,9 @@ class NavComponent extends HTMLElement {
     const currentLinkElement = elementsInsideSlots.find(
       (link) => link.getAttribute('href') === path
     );
-    currentLinkElement.setAttribute('selected', 'true');
+    if (currentLinkElement) {
+      currentLinkElement.setAttribute('selected', 'true');
+    }
   }
 
   static get observedAttributes() {

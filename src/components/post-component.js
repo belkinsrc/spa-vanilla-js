@@ -1,5 +1,6 @@
 import { appUtils } from '@/common';
 import { cachePosts } from '@/service';
+import { routes, goTo } from '@/router';
 
 class PostComponent extends HTMLElement {
   constructor() {
@@ -72,7 +73,8 @@ class PostComponent extends HTMLElement {
     textElement.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      console.log('Click on Text');
+      const url = routes.Post.reverse({ post: id });
+      goTo(url);
     });
 
     const userElement = shadow.querySelector('.user');
@@ -84,7 +86,8 @@ class PostComponent extends HTMLElement {
     userElement.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      console.log('Click on User');
+      const url = routes.User.reverse({ user: post.user.id });
+      goTo(url);
     });
   }
 }

@@ -1,6 +1,7 @@
 import { appUtils } from '@/common';
 import { cacheUsers } from '@/service';
 import { usersApi } from '@/api';
+import { routes, goTo } from '@/router';
 
 class UserComponent extends HTMLElement {
   constructor() {
@@ -51,16 +52,27 @@ class UserComponent extends HTMLElement {
         .catch((error) => console.error(error));
     }
 
+    const userBlock = shadow.querySelector('.user');
+
+    userBlock.addEventListener('click', (e) => {
+      e.stopPropagation();
+      //goto user page
+      const url = routes.User.reverse({ user: id });
+      goTo(url);
+    });
+
     const btnPosts = shadow.querySelector('.user__btn--posts');
     btnPosts.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('btnPosts');
+      const url = routes.UserPosts.reverse({ user: id });
+      goTo(url);
     });
 
     const btnComments = shadow.querySelector('.user__btn--comments');
     btnComments.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('btnComments');
+      const url = routes.UserComments.reverse({ user: id });
+      goTo(url);
     });
   }
 

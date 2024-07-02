@@ -1,72 +1,96 @@
+import { goTo } from '@/router';
 import { appUtils } from '@/common';
 
-class UserAvatarComponent extends HTMLElement {
+class UserAvatar extends HTMLElement {
   constructor() {
     super();
-
-    this.selected = false;
-    this.small = false;
-    this.text = '';
     const shadow = this.attachShadow({ mode: 'open' });
-    const bgColor = appUtils.randomColor();
-    const textColor = appUtils.invertColor(bgColor);
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('class', 'user-avatar');
 
-    shadow.innerHTML = `
-      <style>
-        .user-avatar {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 20px;
-          width: 40px;
-          height: 40px;
-          text-transform: uppercase;
-          font-family: fixed;
-          border-radius: 50%;
-          padding: 16px;
-          background-color: ${bgColor};
-          color: ${textColor};
-          margin-right: 5px;
-        }
-        .user-avatar--small {
-          font-size: 10px;
-          width: 10px;
-          height: 10px;
-        }
-      </style>
-      <div class="user-avatar">
-        <div class="user-avatar__text"></div>
-      </div>
-    `;
+    const text = document.createElement('div');
+    text.setAttribute('class', 'avatar-text');
+    wrapper.appendChild(text);
+
+    const style = document.createElement('style');
+    this.selected = false;
+
+    shadow.appendChild(style);
+    shadow.appendChild(wrapper);
   }
 
   connectedCallback() {
-    this.updateComponent();
+    this.updateElement();
   }
+
+  onClick = (e) => {
+    e.preventDefault();
+    if (!this.selected) {
+      const { pathname: path } = new URL(e.target.href);
+      goTo(path);
+    }
+  };
 
   static get observedAttributes() {
     return ['user-name', 'small'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'small') {
-      this.small = JSON.parse(newValue);
-    } else if (name === 'user-name') {
-      this.text = newValue;
-    }
-    this.updateComponent();
+    this.updateElement();
   }
 
-  updateComponent() {
+  updateElement() {
     const shadow = this.shadowRoot;
-    const avatar = shadow.querySelector('.user-avatar');
-    const textContainer = shadow.querySelector('.user-avatar__text');
 
-    if (this.small) {
-      avatar.classList.add('user-avatar--small');
+    const userName = this.getAttribute('user-name');
+    const small = this.getAttribute('small');
+
+    const style = shadow.querySelector('style');
+    const avatar = shadow.querySelector('.user-avatar');
+    const text = shadow.querySelector('.avatar-text');
+
+    if (small) {
+      avatar.setAttribute('class', 'user-avatar small');
+    } else {
+      avatar.setAttribute('class', 'user-avatar');
     }
-    textContainer.textContent = appUtils.getUserInitials(this.text);
+
+    if (userName) {
+      text.textContent = appUtils.getUserInitials(userName);
+    }
+
+    if (userName) {
+      const bgColor = appUtils.colorForString(userName);
+      const textColor = appUtils.invertColor(bgColor);
+
+      style.textContent = `
+               
+               .user-avatar{
+                   display: flex;
+                   justify-content: center;
+                   align-items: center;
+                   font-size: 20px;
+                   width: 40px;
+                   height: 40px;
+                   text-transform: uppercase;
+                   font-family: fixed;
+                   border-radius: 50%;
+                   padding: 16px;
+                   background-color: ${bgColor};
+                   color: ${textColor};
+                   margin-right: 5px;
+               }
+    
+               .user-avatar.small{
+                   font-family: arial;
+                   font-size: 16px;
+                   width: 10px;
+                   height: 10px;
+               }
+    
+            `;
+    }
   }
 }
 
-customElements.define('user-avatar', UserAvatarComponent);
+customElements.define('user-avatar', UserAvatar);
