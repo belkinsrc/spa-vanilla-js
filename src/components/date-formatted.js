@@ -28,7 +28,7 @@ class DateFormatted extends HTMLElement {
     return ['date'];
   }
 
-  attributeChangedCallback() {
+  attributeChangedCallback(name, oldValue, newValue) {
     this.updateElement();
   }
 

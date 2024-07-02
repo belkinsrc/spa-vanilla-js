@@ -1,39 +1,52 @@
-import { goTo } from '@/router';
+import { render } from '@/router';
 
 class LinkComponent extends HTMLElement {
   constructor() {
     super();
-
     const shadow = this.attachShadow({ mode: 'open' });
+    const link = document.createElement('a');
+    const style = document.createElement('style');
+    this.selected = false;
 
-    shadow.innerHTML = `
-      <style>
-        .main-link {
-          padding: 5px;
-          margin: 5px 5px 5px 0;
-          background-color: #ddd;
-          color: #333;
-        }
+    style.textContent = `
+           
+           a {
+               padding: 5px;
+               margin: 5px 5px 5px 0;
+               background-color: #ddd;
+               color: #333;
+           }
 
-        .main-link:hover {
-          background-color: #666;
-          color: #eee;
-          text-decoration: none;
-        }
-      </style>
-      <a class="main-link">
-        <slot></slot>
-      </a>
-    `;
+           a:hover {
+               background-color: #666;
+               color: #eee;
+               text-decoration: none;
+           }
+        `;
+
+    shadow.appendChild(style);
+    shadow.appendChild(link);
   }
 
   connectedCallback() {
     const shadow = this.shadowRoot;
+    const childNodes = shadow.choldNodes;
+
     const href = this.getAttribute('href');
-    const link = shadow.querySelector('.main-link');
-    link.setAttribute('href', href ?? '#');
-    link.addEventListener('click', this.handleClick.bind(this));
+    const link = shadow.querySelector('a');
+    link.href = href;
+    link.textContent = this.getAttribute('text');
+    link.addEventListener('click', this.onClick);
   }
+
+  onClick = (e) => {
+    e.preventDefault();
+    if (!this.selected) {
+      const { pathname: path } = new URL(e.target.href);
+      window.history.pushState({ path }, path, path);
+      render(path);
+    }
+  };
 
   static get observedAttributes() {
     return ['selected'];
@@ -45,34 +58,22 @@ class LinkComponent extends HTMLElement {
     }
   }
 
-  handleClick(e) {
-    e.preventDefault();
-
-    const isSelected = this.getAttribute('selected');
-    if (!isSelected) {
-      const chainOfParentsOfTargetElement = e.composedPath();
-      const targetElement = chainOfParentsOfTargetElement.find((element) =>
-        element.classList.contains('main-link')
-    );
-    const { pathname: path } = new URL(targetElement.href);
-    goTo(path);
-    }
-  }
-
-  updateStyle(isSelected) {
-    if (isSelected) {
+  updateStyle(selected) {
+    if (selected) {
       const shadow = this.shadowRoot;
       const style = shadow.querySelector('style');
+      this.selected = true;
       style.textContent = `
-        .main-link {
-          padding: 5px;
-          margin: 5px 5px 5px 0;
-          text-decoration: none;
-          background-color: #333;
-          color: #ccc;
-          cursor: default;
-        }
-      `;
+            a {
+                padding: 5px;
+                margin: 5px 5px 5px 0;
+                background-color: #ddd;
+                text-decoration: none;
+                color: #ccc;
+                background-color: #333;
+                cursor: default;
+            }
+            `;
     }
   }
 }

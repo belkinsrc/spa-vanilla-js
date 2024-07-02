@@ -9,6 +9,11 @@ import UserPage from '@/pages/user.template';
 import UserPostsPage from '@/pages/userPosts.template';
 import UserCommentsPage from '@/pages/userComments.template';
 
+import topBlock from '@/pages/main/top.template';
+import leftBlock from '@/pages/main/left.template';
+import rightBlock from '@/pages/main/right.template';
+import bottomBlock from '@/pages/main/bottom.template';
+
 export const routes = {
   Main: new Route(appConstants.routes.index),
   Posts: new Route(appConstants.routes.posts),
@@ -21,8 +26,17 @@ export const routes = {
   UserComments: new Route(appConstants.routes.userComments),
 };
 
+const generateMainPage = (props) =>
+  MainPage({
+    ...props,
+    topBlock: topBlock(props),
+    leftBlock: leftBlock(props),
+    rightBlock: rightBlock(props),
+    bottomBlock: bottomBlock(props),
+  });
+
 const routesWithPages = [
-  { route: routes.Main, page: MainPage },
+  { route: routes.Main, page: generateMainPage },
   { route: routes.Posts, page: PostsPage },
   { route: routes.PostsSearch, page: PostsPage },
   { route: routes.Users, page: UsersPage },

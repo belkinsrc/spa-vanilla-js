@@ -1,8 +1,13 @@
-<main-nav type="post">
-  <nav-link href="/">Main</nav-link>
-  <nav-link href="/posts">Posts</nav-link>
-  <nav-link href="/users">Users</nav-link>
-</main-nav>
-<div>
-  Main Template
-</div>
+<style>
+    app-component .block{
+        padding: 32px;
+    }    
+</style>
+
+<main-nav type="post"></main-nav>
+<app-component>
+    <div slot="block-top" class="block">${props.topBlock || ''}</div>
+    <div slot="block-left" class="block">${props.leftBlock || ''}</div>
+    <div slot="block-right" class="block">${props.rightBlock || ''}</div>
+    <div slot="block-bottom" class="block">${props.bottomBlock || ''}</div>
+</app-component>

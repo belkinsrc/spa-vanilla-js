@@ -1,57 +1,68 @@
+import { goTo, routes } from '@/router';
 import { appUtils } from '@/common';
 import { cachePosts } from '@/service';
-import { routes, goTo } from '@/router';
 
 class PostComponent extends HTMLElement {
   constructor() {
     super();
-
     const shadow = this.attachShadow({ mode: 'open' });
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('class', 'post-block');
 
-    shadow.innerHTML = `
-      <style>
-        .post {
-          max-width: 200px;
-          border-radius: 10px;
-          background-color: #ccc;
-          margin: 10px;
-          padding: 10px;
-        }
-        .post .post__title {
-          padding: 10px;
-          font-weight: bold; 
-        }
-        .post .post__text {
-          padding: 10px;
-          font-family: fantasy;
-          max-height: 200px;
-          overflow: hidden;
-          cursor: pointer;
-        }
-        .user {
-          padding: 10px;
-          font-family: arial;
-          background-color: #fff;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-        }
-        .user-avatar {
-          margin-right: 10px;
-        }
-        .highlight {
-          background-color: yellow;
-        }
-      </style>
-      <div class="post">
-        <div class="post__title"></div>
-        <div class="post__text"></div>
-        <div class="user post__user">
-          <user-avatar small="true"></user-avatar>
-          <div class="user__name"></div>
-        </div>
-      </div>
-    `;
+    wrapper.innerHTML = `
+            <div class="post-title"></div>
+            <div class="post-text"></div>
+            <div class="post-user">
+                <user-avatar small="true"></user-avatar>
+                <div class="user-name"></div>
+            </div>
+        `;
+
+    const style = document.createElement('style');
+
+    style.textContent = `
+           
+           .post-block{
+               max-width: 200px;
+               border-radius: 10px;
+               background-color: #ccc;
+               margin: 10px;
+               padding: 10px;
+           }
+
+           .post-block .post-title{
+               padding: 10px;
+               font-weight: bold; 
+           }
+
+           .post-block .post-text{
+               padding: 10px;
+               font-family: fantasy;
+               max-height: 200px;
+               overflow: hidden;
+               cursor: pointer;
+           }
+           .post-block .post-user{
+               padding: 10px;
+               font-family: arial;
+               background-color: #fff;
+               cursor: pointer;
+               display: flex;
+               align-items: center;
+           }
+
+           .user-avatar{
+               margin-right: 10px;
+           }
+
+           .highlight{
+               background-color: yellow;
+           }
+
+        `;
+
+    shadow.appendChild(style);
+    shadow.appendChild(wrapper);
   }
 
   connectedCallback() {
@@ -60,32 +71,33 @@ class PostComponent extends HTMLElement {
     const search = this.getAttribute('search');
     const post = cachePosts.getPost(id);
 
-    const titleElement = shadow.querySelector('.post__title');
-    titleElement.textContent = post.title;
-    const textElement = shadow.querySelector('.post__text');
-
+    const title = shadow.querySelector('.post-title');
+    title.textContent = post.title;
+    const text = shadow.querySelector('.post-text');
     if (search) {
-      textElement.innerHTML = appUtils.highlightText(post.text, search);
+      text.innerHTML = appUtils.highlightText(post.text, search);
     } else {
-      textElement.textContent = post.text;
+      text.textContent = post.text;
     }
 
-    textElement.addEventListener('click', (e) => {
+    text.addEventListener('click', (e) => {
       e.stopPropagation();
-
+      //goto post
       const url = routes.Post.reverse({ post: id });
       goTo(url);
     });
 
-    const userElement = shadow.querySelector('.user');
-    const userAvatarElement = shadow.querySelector('user-avatar');
-    userAvatarElement.setAttribute('user-name', post.user.user_name);
-    const userNameElement = shadow.querySelector('.user__name');
-    userNameElement.textContent = post.user.user_name;
+    const user = shadow.querySelector('.post-user');
+    const userAvatar = shadow.querySelector('user-avatar');
+    userAvatar.setAttribute('user-name', post.user.user_name);
 
-    userElement.addEventListener('click', (e) => {
+    const userName = shadow.querySelector('.user-name');
+    //debugger
+    userName.textContent = post.user.user_fullname;
+
+    user.addEventListener('click', (e) => {
       e.stopPropagation();
-
+      //goto user
       const url = routes.User.reverse({ user: post.user.id });
       goTo(url);
     });

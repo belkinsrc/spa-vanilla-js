@@ -1,6 +1,7 @@
 import { appConstants } from '@/common';
 import { cachePosts, cacheUsers, cacheComments } from '@/service';
 import { postsApi, usersApi, commentsApi } from '@/api';
+
 class ListComponent extends HTMLElement {
   constructor() {
     super();
