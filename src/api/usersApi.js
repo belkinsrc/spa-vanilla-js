@@ -5,7 +5,7 @@ export const getUsers = (page) => {
 };
 
 export const getUserById = (id) => {
-  return baseApi.get(`/users?userId=${id}`);
+  return baseApi.get(`/users/${id}`);
 };
 
 export const getUsersSearch = (search, page) => {
