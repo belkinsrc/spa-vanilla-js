@@ -1,6 +1,6 @@
-<main-nav type="user">
+<main-nav type="post" search="${props.query || ''}">
   <nav-link href="/">Main</nav-link>
   <nav-link href="/posts">Posts</nav-link>
   <nav-link href="/users">Users</nav-link>
 </main-nav>
-<list-component list-type="user" search="${props.query || ''}">Users Template</list-component>
+<user-component id="${props.user}" single="true"></user-component>

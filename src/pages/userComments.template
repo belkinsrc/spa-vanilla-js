@@ -3,4 +3,5 @@
   <nav-link href="/posts">Posts</nav-link>
   <nav-link href="/users">Users</nav-link>
 </main-nav>
-<list-component list-type="post" search="${props.query || ''}"></list-component>
+<user-component id="${props.user}" single="true"></user-component>
+<list-component list-type="comment" user="${props.user}"></list-componentk>
