@@ -3,25 +3,10 @@ import { appUtils } from '@/common';
 class DateFormatted extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'date-formatted');
-
-    const style = document.createElement('style');
-
-    style.textContent = `
-        .date-formatted {
-          font-family: arial;
-          font-size: 12px;
-
-        }
-        `;
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
-  }
-
-  connectedCallback() {
-    this.updateElement();
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#date-formatted-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
   static get observedAttributes() {
@@ -29,14 +14,15 @@ class DateFormatted extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this.updateElement();
+    if (name === 'date') {
+      this.#update();
+    }
   }
 
-  updateElement() {
-    const shadow = this.shadowRoot;
+  #update() {
+    console.log('sdfsdf');
     const currentDate = this.getAttribute('date');
-
-    const date = shadow.querySelector('.date-formatted');
+    const date = this.shadow.querySelector('.date-formatted');
     date.textContent = appUtils.dateFormat(currentDate);
   }
 }

@@ -1,84 +1,17 @@
-
 class Pagination extends HTMLElement {
   constructor() {
     super();
     this.page = 1;
     this.lastPage = false;
-    const shadow = this.attachShadow({ mode: 'open' });
-
-    const pagination = document.createElement('div');
-    pagination.setAttribute('class', 'posts-pagination');
-
-    const btnPrev = document.createElement('button');
-    btnPrev.setAttribute('class', 'prev-button');
-    btnPrev.textContent = '< Prev';
-    btnPrev.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (this.page > 1) {
-        const event = new CustomEvent('paginate-back');
-        this.dispatchEvent(event);
-      }
-    });
-
-    const btnNext = document.createElement('button');
-    btnNext.setAttribute('class', 'next-button');
-    btnNext.textContent = 'Next >';
-    btnNext.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!this.lastPage) {
-        const event = new CustomEvent('paginate-next');
-        this.dispatchEvent(event);
-      }
-    });
-
-    const pageLabel = document.createElement('div');
-    pageLabel.setAttribute('class', 'page-label');
-    pageLabel.textContent = `Page ${this.page}`;
-
-    pagination.appendChild(btnPrev);
-    pagination.appendChild(pageLabel);
-    pagination.appendChild(btnNext);
-    shadow.appendChild(pagination);
-
-    const style = document.createElement('style');
-
-    style.textContent = `
-           
-           .posts-pagination{
-               display: flex;
-               justify-content: center;
-
-           }
-           .page-label{
-               margin: 0 10px;
-               font-weight: bold;
-               font-family: system-ui;
-           }
-        `;
-
-    shadow.appendChild(style);
-  }
-
-  updateComponent() {
-    const shadow = this.shadowRoot;
-    const nextBtn = shadow.querySelector('.next-button');
-    const prevBtn = shadow.querySelector('.prev-button');
-    const pageLabel = shadow.querySelector('.page-label');
-    if (this.page === 1) {
-      prevBtn.setAttribute('disabled', true);
-    } else {
-      prevBtn.removeAttribute('disabled');
-    }
-    if (this.lastPage) {
-      nextBtn.setAttribute('disabled', true);
-    } else {
-      nextBtn.removeAttribute('disabled');
-    }
-    pageLabel.textContent = `Page ${this.page}`;
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#pagination-component-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
   connectedCallback() {
-    this.updateComponent();
+    this.#update();
+    this.#handleClickButtons();
   }
 
   static get observedAttributes() {
@@ -92,7 +25,53 @@ class Pagination extends HTMLElement {
     if (name === 'last') {
       this.lastPage = JSON.parse(newValue);
     }
-    this.updateComponent();
+    this.#update();
+  }
+
+  #update() {
+    this.#setCurrentPage();
+    this.#disableButtons();
+  }
+
+  #setCurrentPage() {
+    const pageLabel = this.shadow.querySelector('.pagination__label');
+    pageLabel.textContent = `Page ${this.page}`;
+  }
+
+  #disableButtons() {
+    const btnPrev = this.shadow.querySelector('.pagination__btn--prev');
+    const btnNext = this.shadow.querySelector('.pagination__btn--next');
+
+    if (this.page === 1) {
+      btnPrev.setAttribute('disabled', true);
+    } else {
+      btnPrev.removeAttribute('disabled');
+    }
+    if (this.lastPage) {
+      btnNext.setAttribute('disabled', true);
+    } else {
+      btnNext.removeAttribute('disabled');
+    }
+  }
+
+  #handleClickButtons() {
+    const btnPrev = this.shadow.querySelector('.pagination__btn--prev');
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (this.page > 1) {
+        const event = new CustomEvent('paginate-back');
+        this.dispatchEvent(event);
+      }
+    });
+
+    const btnNext = this.shadow.querySelector('.pagination__btn--next');
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!this.lastPage) {
+        const event = new CustomEvent('paginate-next');
+        this.dispatchEvent(event);
+      }
+    });
   }
 }
 

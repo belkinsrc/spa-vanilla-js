@@ -1,3 +1,7 @@
-<main-nav type="user"></main-nav>
+<main-nav type="user">
+  <nav-link slot="link" href="/" class="link link--home">Home</nav-link>
+  <nav-link slot="link" href="/posts" class="link link--posts">Posts</nav-link>
+  <nav-link slot="link" href="/users" class="link link--users">Users</nav-link>
+</main-nav>
 <user-component id="${props.user}" single="true"></user-component>
-<list-component list-type="post" user="${props.user}"></list-component>
+<list-component type="userPosts" user="${props.user}"></list-component>

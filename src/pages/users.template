@@ -1,2 +1,6 @@
-<main-nav type="user" search="${props.query || ''}"></main-nav>
-<list-component list-type="user" search="${props.query || ''}"></list-component>
+<main-nav type="user" search="${props.query || ''}">
+  <nav-link slot="link" href="/" class="link link--home">Home</nav-link>
+  <nav-link slot="link" href="/posts" class="link link--posts">Posts</nav-link>
+  <nav-link slot="link" href="/users" class="link link--users">Users</nav-link>
+</main-nav>
+<list-component type="users" search="${props.query || ''}"></list-component>

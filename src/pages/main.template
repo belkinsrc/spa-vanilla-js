@@ -4,7 +4,11 @@
     }    
 </style>
 
-<main-nav type="post"></main-nav>
+<main-nav type="post">
+  <nav-link slot="link" href="/" class="link link--home">Home</nav-link>
+  <nav-link slot="link" href="/posts" class="link link--posts">Posts</nav-link>
+  <nav-link slot="link" href="/users" class="link link--users">Users</nav-link>
+</main-nav>
 <app-component>
     <div slot="block-top" class="block">${props.topBlock || ''}</div>
     <div slot="block-left" class="block">${props.leftBlock || ''}</div>

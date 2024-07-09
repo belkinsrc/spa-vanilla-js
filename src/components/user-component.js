@@ -6,98 +6,75 @@ import { usersApi } from '@/api';
 class UserComponent extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'user-holder');
-    const block = document.createElement('div');
-    block.setAttribute('class', 'user-block');
-    wrapper.appendChild(block);
-
-    const title = document.createElement('h2');
-    title.setAttribute('class', 'user-title-main');
-
-    shadow.appendChild(title);
-
-    block.innerHTML = `
-            <div class="avatar-holder">
-                <user-avatar></user-avatar>
-                <div class="user-title"></div>
-            </div>
-            <div class="user-text"></div>
-            <div class="user-buttons">
-                <div class="user-btn user-btn-posts">Posts</div>
-                <div class="user-btn user-btn-comments">Comments</div>
-            </div>
-        `;
-
-    const style = document.createElement('style');
-
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#user-component-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
-  connectedCallback() {
-    const shadow = this.shadowRoot;
+  async connectedCallback() {
     const id = this.getAttribute('id');
-    const single = this.getAttribute('single');
     const user = cacheUsers.getUser(id);
-    const userAvatar = shadow.querySelector('user-avatar');
-
-    if (single) {
-      const title = shadow.querySelector('.user-title-main');
-      title.textContent = 'User info';
-    } else {
-      userAvatar.setAttribute('small', 'true');
-    }
-    this.updateStyle();
 
     if (user) {
-      this.updateUser();
+      this.#update(id, user);
     } else {
-      usersApi.getUserById(id)
-        .then((user) => {
-          cacheUsers.setUser(user);
-          this.updateUser();
-        })
-        .catch((e) => console.log(e));
+      try {
+        const user = await usersApi.getUserById(id);
+        cacheUsers.setUser(user);
+        this.#update(id, user);
+      } catch (error) {
+        console.error(error);
+      }
     }
-
-    const userText = shadow.querySelector('.user-text');
-    const userBlock = shadow.querySelector('.user-holder');
-
-    userBlock.addEventListener('click', (e) => {
-      e.stopPropagation();
-      //goto user page
-      const url = routes.User.reverse({ user: id });
-      goTo(url);
-    });
-
-    const btnPosts = shadow.querySelector('.user-btn-posts');
-    btnPosts.addEventListener('click', (e) => {
-      e.stopPropagation();
-      //goto user's posts
-      const url = routes.UserPosts.reverse({ user: id });
-      goTo(url);
-    });
-
-    const btnComments = shadow.querySelector('.user-btn-comments');
-    btnComments.addEventListener('click', (e) => {
-      e.stopPropagation();
-      //goto user's comments
-      const url = routes.UserComments.reverse({ user: id });
-      goTo(url);
-    });
   }
 
-  updateUser() {
-    const shadow = this.shadowRoot;
-    const id = this.getAttribute('id');
-    const single = this.getAttribute('single');
-    const search = this.getAttribute('search');
-    const title = shadow.querySelector('.user-title');
-    const text = shadow.querySelector('.user-text');
+  #update(id, user) {
+    this.#setTitle();
+    this.#setAvatar(user);
+    this.#updateStyle();
+    this.#highlightText(user);
+    this.#handleClick(id);
+  }
 
-    const user = cacheUsers.getUser(id);
+  #updateStyle() {
+    const single = this.getAttribute('single');
+    if (single) {
+      const wrapper = this.shadow.querySelector('.user__wrapper');
+      wrapper.style.backgroundColor = '#fff';
+      wrapper.style.border = '1px solid #ccc';
+
+      const buttons = this.shadow.querySelectorAll('.user__btn');
+      buttons.forEach((btn) => {
+        btn.style.backgroundColor = '#fff';
+        btn.style.border = '1px solid #ccc';
+      });
+    }
+  }
+
+  #setTitle() {
+    const single = this.getAttribute('single');
+
+    if (single) {
+      const title = this.shadow.querySelector('.title');
+      title.textContent = 'User info';
+    }
+  }
+
+  #setAvatar(user) {
+    const userAvatar = this.shadow.querySelector('user-avatar');
+    const single = this.getAttribute('single');
+
+    if (!single) {
+      userAvatar.setAttribute('small', 'true');
+    }
+    userAvatar.setAttribute('user-name', user.user_name);
+  }
+
+  #highlightText(user) {
+    const search = this.getAttribute('search');
+    const title = this.shadow.querySelector('.user__title');
+    const text = this.shadow.querySelector('.user__text');
 
     if (search) {
       title.innerHTML = appUtils.highlightText(user.user_fullname, search);
@@ -106,95 +83,29 @@ class UserComponent extends HTMLElement {
       title.textContent = user.user_fullname;
       text.textContent = user.user_name;
     }
-
-    const userAvatar = shadow.querySelector('user-avatar');
-    userAvatar.setAttribute('user-name', user.user_name);
   }
 
-  updateStyle() {
-    const shadow = this.shadowRoot;
-    const single = this.getAttribute('single');
-    const style = shadow.querySelector('style');
+  #handleClick(id) {
+    const userBlock = this.shadow.querySelector('.user');
+    userBlock.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const url = routes.User.reverse({ user: id });
+      goTo(url);
+    });
 
-    const customStyle = single
-      ? `
-           background-color: #fff;
-           border: 1px solid #ccc;
-        `
-      : `
-           background-color: #ccc;
-        `;
+    const btnPosts = this.shadow.querySelector('.user__btn--posts');
+    btnPosts.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const url = routes.UserPosts.reverse({ user: id });
+      goTo(url);
+    });
 
-    const customButtonStyle = single
-      ? `
-           background-color: #fff;
-           border: 1px solid #ccc;
-        `
-      : `
-           background-color: #ccc;
-        `;
-
-    style.textContent = `
-           .user-holder{
-               display: flex;
-               justify-content: center;
-           }
-
-           .avatar-holder{
-               display: flex;
-           }
-           
-           .user-title-main{
-               text-align: center;
-           }
-           
-           
-           .user-block{
-            max-width: 200px;
-            border-radius: 10px;
-            ${customStyle}
-            margin: 10px;
-            padding: 10px;
-        }
-
-        .user-block .user-title{
-            padding: 10px;
-            font-weight: bold; 
-        }
-
-        .user-block .user-text{
-            padding: 10px;
-            font-family: fantasy;
-            max-height: 200px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .user-block .user-buttons{
-            padding: 10px;
-            font-family: arial;
-            display: flex;
-            justify-content: space-around;
-            min-width: 200px;
-        } 
-       
-        .user-block .user-buttons .user-btn{
-            padding: 10px;
-            ${customButtonStyle}
-            color: #666;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .user-block .user-buttons .user-btn:hover{
-            color: #333;
-            background-color: #eee;
-        }
-
-        .highlight{
-            background-color: yellow;
-        }
-        `;
+    const btnComments = this.shadow.querySelector('.user__btn--comments');
+    btnComments.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const url = routes.UserComments.reverse({ user: id });
+      goTo(url);
+    });
   }
 }
 

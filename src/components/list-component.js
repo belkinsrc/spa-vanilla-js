@@ -8,35 +8,49 @@ class ListComponent extends HTMLElement {
     this.search = '';
     this.page = 1;
     this.lastPage = false;
-    this.typeList = appConstants.lists.types.post;
+    this.typeList = appConstants.lists.types.posts;
 
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'list-block');
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#entity-list-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
+  }
 
-    const title = document.createElement('h2');
-    title.setAttribute('class', 'list-title');
-    shadow.appendChild(title);
+  connectedCallback() {
+    this.#handlePagination();
+    this.#fetchEntities();
+  }
 
-    //pagination
-    const pagination = document.createElement('pagination-component');
-    pagination.setAttribute('class', 'list-pagination');
-    pagination.setAttribute('page', this.page);
-    pagination.setAttribute('last', this.lastPage);
+  static get observedAttributes() {
+    return ['search', 'type'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'search') {
+      this.#update(newValue);
+    }
+    if (name === 'type') {
+      this.#setType(newValue);
+      this.#setTitle();
+    }
+  }
+
+  #update(query) {
+    if (query) {
+      this.search = query;
+    }
+    this.#fetchEntities();
+  }
+
+  #handlePagination() {
+    const pagination = this.shadow.querySelector('pagination-component');
 
     pagination.addEventListener('paginate-back', (e) => {
       e.stopPropagation();
       if (this.page > 1) {
         this.page = this.page - 1;
-        if (this.typeList === appConstants.lists.types.post) {
-          this.getPostsPage();
-        }
-        if (this.typeList === appConstants.lists.types.user) {
-          this.getUsersPage();
-        }
-        if (this.typeList === appConstants.lists.types.comment) {
-          this.getCommentsPage();
-        }
+        pagination.setAttribute('page', this.page);
+        this.#fetchEntities();
       }
     });
 
@@ -44,214 +58,170 @@ class ListComponent extends HTMLElement {
       e.stopPropagation();
       if (!this.lastPage) {
         this.page = this.page + 1;
-        if (this.typeList === appConstants.lists.types.post) {
-          this.getPostsPage();
-        }
-        if (this.typeList === appConstants.lists.types.user) {
-          this.getUsersPage();
-        }
-        if (this.typeList === appConstants.lists.types.comment) {
-          this.getCommentsPage();
-        }
+        pagination.setAttribute('page', this.page);
+        this.#fetchEntities();
       }
     });
-    shadow.appendChild(pagination);
-
-    const style = document.createElement('style');
-
-    style.textContent = `
-           
-           .list-block{
-               display: flex;
-               align-items: flex-start;
-               justify-content: center;
-               flex-wrap: wrap;
-               padding: 5px;
-           }
-
-           .list-title{
-               text-align: center;
-           }
-
-           .list-pagination{
-            display: flex;
-            justify-content: center;
-           }
-
-        `;
-
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
   }
 
-  connectedCallback() {
-    this.updateComponent();
-  }
-
-  static get observedAttributes() {
-    return ['search'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    this.updateComponent();
-  }
-
-  updateComponent() {
-    const shadow = this.shadowRoot;
-    const userId = this.getAttribute('user');
-    const search = this.getAttribute('search');
-    const typeList = this.getAttribute('list-type');
-
-    if (search) {
-      this.search = search;
-    }
-
-    if (typeList) {
-      this.typeList = typeList;
-    }
-
-    const title = shadow.querySelector('.list-title');
-
-    if (this.typeList === appConstants.lists.types.post) {
-      this.getPostsPage();
-    }
-    if (this.typeList === appConstants.lists.types.user) {
-      this.getUsersPage();
-    }
-    if (this.typeList === appConstants.lists.types.comment) {
-      this.getCommentsPage();
+  #setTitle() {
+    const title = this.shadow.querySelector('.title');
+    switch (this.typeList) {
+      case appConstants.lists.types.posts:
+        title.textContent = 'All posts';
+        break;
+      case appConstants.lists.types.users:
+        title.textContent = 'All users';
+        break;
+      case appConstants.lists.types.userPosts:
+        title.textContent = 'User posts';
+        break;
+      case appConstants.lists.types.userComments:
+        title.textContent = 'User comments';
+        break;
+      case appConstants.lists.types.postComments:
+        title.textContent = 'Post comments';
+        break;
     }
   }
 
-  getPostsPage() {
-    const shadow = this.shadowRoot;
-    const userId = this.getAttribute('user');
-    const wrapper = shadow.querySelector('.list-block');
-    const pagination = shadow.querySelector('pagination-component');
-    pagination.setAttribute('page', this.page);
-    pagination.setAttribute('last', this.lastPage);
-
-    const title = shadow.querySelector('.list-title');
-    title.textContent = 'All posts';
-
-    if (userId) {
-      title.textContent = "Users' posts";
+  #setType(value) {
+    for (let type in appConstants.lists.types) {
+      if (value === type) {
+        this.typeList = value;
+      }
     }
+  }
 
-    const apiCall = this.search
-      ? postsApi.getPostsSearch(this.search, this.page)
-      : userId
-      ? postsApi.getPostsByUser(userId, this.page)
-      : postsApi.getPosts(this.page);
+  async #fetchEntities() {
+    const api = this.#getEntitiesApi();
 
-    apiCall
-      .then((posts) => {
-        this.lastPage = posts.length < 10;
-        const count = posts.length;
-        pagination.setAttribute('last', this.lastPage);
-        wrapper.innerHTML = '';
-        posts.forEach((post) => {
-          cachePosts.setPost(post);
-          const postElement = document.createElement('post-component');
-          postElement.setAttribute('id', post.id);
-          if (this.search) {
-            postElement.setAttribute('search', this.search);
-          }
-          wrapper.appendChild(postElement);
-        });
-        if (count === 0 && this.page === 1) {
-          //no data
-          wrapper.innerHTML = '<h3>No posts yet</h3>';
+    if (api) {
+      try {
+        const entities = await api;
+        let entityType = '';
+        const entityAttributes = {};
+        const options = {
+          cache: {},
+        };
+
+        switch (this.typeList) {
+          case appConstants.lists.types.users:
+            entityType = 'user-component';
+            options.cache.set = cacheUsers.setUser;
+
+            if (this.search) {
+              entityAttributes.search = this.search;
+            }
+            break;
+          case appConstants.lists.types.posts:
+            entityType = 'post-component';
+            options.cache.set = cachePosts.setPost;
+
+            if (this.search) {
+              entityAttributes.search = this.search;
+            }
+            break;
+          case appConstants.lists.types.userPosts:
+            entityType = 'post-component';
+            options.cache.set = cachePosts.setPost;
+
+            if (this.search) {
+              entityAttributes.search = this.search;
+            }
+            break;
+          case appConstants.lists.types.userComments:
+          case appConstants.lists.types.postComments:
+            entityType = 'comment-component';
+            options.cache.set = cacheComments.setComment;
+
+            if (this.search) {
+              entityAttributes.search = this.search;
+            }
+            const userId = this.getAttribute('user');
+            if (userId) {
+              entityAttributes['post-btn'] = 'true';
+            }
+            break;
         }
-      })
-      .catch((error) => console.log(error));
+        this.#render(entities, entityType, entityAttributes, options);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   }
 
-  getUsersPage() {
-    const shadow = this.shadowRoot;
-    const userId = this.getAttribute('user');
-    const wrapper = shadow.querySelector('.list-block');
-    const pagination = shadow.querySelector('pagination-component');
-    pagination.setAttribute('page', this.page);
-    pagination.setAttribute('last', this.lastPage);
+  #render(entities, entityType, entityAttributes, options) {
+    const { cache } = options;
 
-    const title = shadow.querySelector('.list-title');
-    title.textContent = 'All users';
+    const pagination = this.shadow.querySelector('pagination-component');
+    const wrapper = this.shadow.querySelector('.entity-list');
+    wrapper.innerHTML = '';
 
-    const apiCall = this.search
-      ? usersApi.getUsersSearch(this.search, this.page)
-      : usersApi.getUsers(this.page);
+    entities.forEach((entity) => {
+      cache.set(entity);
 
-    apiCall
-      .then((users) => {
-        this.lastPage = users.length < 10;
-        pagination.setAttribute('last', this.lastPage);
-        wrapper.innerHTML = '';
-        users.forEach((user) => {
-          cacheUsers.setUser(user);
-          const userElement = document.createElement('user-component');
-          userElement.setAttribute('id', user.id);
-          if (this.search) {
-            userElement.setAttribute('search', this.search);
-          }
-          wrapper.appendChild(userElement);
-        });
-      })
-      .catch((error) => console.log(error));
+      this.lastPage = entities.length < 10;
+      pagination.setAttribute('last', this.lastPage);
+
+      const entityElement = document.createElement(entityType);
+      entityElement.setAttribute('id', entity.id);
+  
+      for (let attribute in entityAttributes) {
+        if (entityAttributes.hasOwnProperty(attribute)) {
+          entityElement.setAttribute(attribute, entityAttributes[attribute]);
+        }
+      }
+      wrapper.appendChild(entityElement);
+    });
+
+    if (entities.length === 0) {
+      wrapper.innerHTML = '<h3>No comments yet</h3>';
+    }
   }
 
-  getCommentsPage() {
-    const shadow = this.shadowRoot;
+  #getEntitiesApi() {
     const userId = this.getAttribute('user');
     const postId = this.getAttribute('post');
-    const wrapper = shadow.querySelector('.list-block');
-    const pagination = shadow.querySelector('pagination-component');
-    const title = shadow.querySelector('.list-title');
+    const page = this.page;
+    const search = this.search;
 
-    title.textContent = 'All comments';
-    if (userId) {
-      title.textContent = "User's comments";
+    switch (this.typeList) {
+      case appConstants.lists.types.users:
+        return this.#getUsersApi(search, page);
+      case appConstants.lists.types.postComments:
+      case appConstants.lists.types.userComments:
+        return this.#getCommentsApi(search, userId, postId, page);
+      default:
+        return this.#getPostsApi(search, userId, page);
     }
-    if (postId) {
-      title.textContent = "Post's comments";
+  }
+
+  #getUsersApi(search, page) {
+    return search
+      ? usersApi.getUsersSearch(search, page)
+      : usersApi.getUsers(page);
+  }
+
+  #getPostsApi(search, userId, page) {
+    if (search) {
+      return postsApi.getPostsSearch(search, page);
+    } else if (userId) {
+      return postsApi.getPostsByUser(userId, page);
+    } else {
+      return postsApi.getPosts(page);
     }
+  }
 
-    pagination.setAttribute('page', this.page);
-    pagination.setAttribute('last', this.lastPage);
-
-    const apiCall = this.search
-      ? commentsApi.getCommentsSearch(this.search, this.page)
-      : userId
-      ? commentsApi.getCommentsByUser(userId, this.page)
-      : postId
-      ? commentsApi.getCommentsByPost(postId, this.page)
-      : null;
-
-    if (apiCall) {
-      apiCall
-        .then((comments) => {
-          const count = comments.length;
-          this.lastPage = count < 10;
-          pagination.setAttribute('last', this.lastPage);
-          wrapper.innerHTML = '';
-          comments.forEach((comment) => {
-            cacheComments.setComment(comment);
-            const commentElement = document.createElement('comment-component');
-            commentElement.setAttribute('id', comment.id);
-            if (this.search) {
-              commentElement.setAttribute('search', this.search);
-            }
-            if (userId) {
-              commentElement.setAttribute('post-btn', 'true');
-            }
-            wrapper.appendChild(commentElement);
-          });
-          if (count === 0 && this.page === 1) {
-            //no data
-            wrapper.innerHTML = '<h3>No comments yet</h3>';
-          }
-        })
-        .catch((error) => console.log(error));
+  #getCommentsApi(search, userId, postId, page) {
+    if (search) {
+      return commentsApi.getCommentsSearch(search, page);
+    } else if (userId) {
+      return commentsApi.getCommentsByUser(userId, page);
+    } else if (postId) {
+      return commentsApi.getCommentsByPost(postId, page);
+    } else {
+      return null;
     }
   }
 }

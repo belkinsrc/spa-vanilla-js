@@ -5,102 +5,78 @@ import { cachePosts } from '@/service';
 class PostComponent extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'post-block');
-
-    wrapper.innerHTML = `
-            <div class="post-title"></div>
-            <div class="post-text"></div>
-            <div class="post-user">
-                <user-avatar small="true"></user-avatar>
-                <div class="user-name"></div>
-            </div>
-        `;
-
-    const style = document.createElement('style');
-
-    style.textContent = `
-           
-           .post-block{
-               max-width: 200px;
-               border-radius: 10px;
-               background-color: #ccc;
-               margin: 10px;
-               padding: 10px;
-           }
-
-           .post-block .post-title{
-               padding: 10px;
-               font-weight: bold; 
-           }
-
-           .post-block .post-text{
-               padding: 10px;
-               font-family: fantasy;
-               max-height: 200px;
-               overflow: hidden;
-               cursor: pointer;
-           }
-           .post-block .post-user{
-               padding: 10px;
-               font-family: arial;
-               background-color: #fff;
-               cursor: pointer;
-               display: flex;
-               align-items: center;
-           }
-
-           .user-avatar{
-               margin-right: 10px;
-           }
-
-           .highlight{
-               background-color: yellow;
-           }
-
-        `;
-
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#post-component-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
-  connectedCallback() {
-    const shadow = this.shadowRoot;
+  async connectedCallback() {
     const id = this.getAttribute('id');
-    const search = this.getAttribute('search');
     const post = cachePosts.getPost(id);
 
-    const title = shadow.querySelector('.post-title');
-    title.textContent = post.title;
-    const text = shadow.querySelector('.post-text');
+    if (post) {
+      this.#update(id, post);
+    } else {
+      try {
+        const post = await postsApi.getPostById(id);
+        this.#update(id, post);
+        cachePosts.setPost(post);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  #update(id, post) {
+    this.#setTitle(post);
+    this.#setUserAvatar(post);
+    this.#setUserName(post);
+    this.#highlightText(post);
+    this.#handleClick(id, post);
+  }
+
+  #highlightText(post) {
+    const text = this.shadow.querySelector('.post__text');
+    const search = this.getAttribute('search');
+
     if (search) {
       text.innerHTML = appUtils.highlightText(post.text, search);
     } else {
       text.textContent = post.text;
     }
+  }
 
-    text.addEventListener('click', (e) => {
-      e.stopPropagation();
-      //goto post
+  #setTitle(post) {
+    const title = this.shadow.querySelector('.post__title');
+    title.textContent = post.title;
+  }
+
+  #handleClick(id, post) {
+    const user = this.shadow.querySelector('.user');
+    const text = this.shadow.querySelector('.post__text');
+
+    text.addEventListener('click', (event) => {
+      event.stopPropagation();
       const url = routes.Post.reverse({ post: id });
       goTo(url);
     });
 
-    const user = shadow.querySelector('.post-user');
-    const userAvatar = shadow.querySelector('user-avatar');
-    userAvatar.setAttribute('user-name', post.user.user_name);
-
-    const userName = shadow.querySelector('.user-name');
-    //debugger
-    userName.textContent = post.user.user_fullname;
-
-    user.addEventListener('click', (e) => {
-      e.stopPropagation();
-      //goto user
+    user.addEventListener('click', (event) => {
+      event.stopPropagation();
       const url = routes.User.reverse({ user: post.user.id });
       goTo(url);
     });
+  }
+
+  #setUserAvatar(post) {
+    const userAvatar = this.shadow.querySelector('user-avatar');
+    userAvatar.setAttribute('user-name', post.user.user_name);
+  }
+
+  #setUserName(post) {
+    const userName = this.shadow.querySelector('.user__name');
+    userName.textContent = post.user.user_fullname;
   }
 }
 
