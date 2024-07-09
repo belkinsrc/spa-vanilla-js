@@ -1,52 +1,21 @@
-import { render } from '@/router';
+import { goTo } from '@/router';
 
 class LinkComponent extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    const link = document.createElement('a');
-    const style = document.createElement('style');
     this.selected = false;
-
-    style.textContent = `
-           
-           a {
-               padding: 5px;
-               margin: 5px 5px 5px 0;
-               background-color: #ddd;
-               color: #333;
-           }
-
-           a:hover {
-               background-color: #666;
-               color: #eee;
-               text-decoration: none;
-           }
-        `;
-
-    shadow.appendChild(style);
-    shadow.appendChild(link);
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#link-component-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
   connectedCallback() {
-    const shadow = this.shadowRoot;
-    const childNodes = shadow.choldNodes;
-
     const href = this.getAttribute('href');
-    const link = shadow.querySelector('a');
-    link.href = href;
-    link.textContent = this.getAttribute('text');
-    link.addEventListener('click', this.onClick);
+    const link = this.shadow.querySelector('a');
+    link.setAttribute('href', href);
+    link.addEventListener('click', this.#handleClick);
   }
-
-  onClick = (e) => {
-    e.preventDefault();
-    if (!this.selected) {
-      const { pathname: path } = new URL(e.target.href);
-      window.history.pushState({ path }, path, path);
-      render(path);
-    }
-  };
 
   static get observedAttributes() {
     return ['selected'];
@@ -54,26 +23,39 @@ class LinkComponent extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'selected') {
-      this.updateStyle(JSON.parse(newValue));
+      this.#updateStyle(JSON.parse(newValue));
     }
   }
 
-  updateStyle(selected) {
-    if (selected) {
-      const shadow = this.shadowRoot;
-      const style = shadow.querySelector('style');
-      this.selected = true;
-      style.textContent = `
-            a {
-                padding: 5px;
-                margin: 5px 5px 5px 0;
-                background-color: #ddd;
-                text-decoration: none;
-                color: #ccc;
-                background-color: #333;
-                cursor: default;
-            }
-            `;
+  #updateStyle(selected) {
+    if (!selected) return;
+
+    this.selected = true;
+
+    const style = this.shadow.querySelector('style');
+    style.textContent = `
+      a {
+        padding: 5px;
+        margin: 5px 5px 5px 0;
+        background-color: #ddd;
+        text-decoration: none;
+        color: #ccc;
+        background-color: #333;
+        cursor: default;
+      }
+    `;
+  }
+
+  #handleClick(event) {
+    event.preventDefault();
+
+    if (!this.selected) {
+      const propagationElements = event.composedPath();
+      const target = propagationElements.find((elem) =>
+        elem.getAttribute('href')
+      );
+      const { pathname: path } = new URL(target.href);
+      goTo(path);
     }
   }
 }

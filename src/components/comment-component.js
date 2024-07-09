@@ -4,122 +4,70 @@ import { cacheComments } from '@/service';
 class CommentComponent extends HTMLElement {
   constructor() {
     super();
-
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'comment-block');
-
-    wrapper.innerHTML = `<div class="comment-text"></div>
-    <div class="bottom-block">
-        <div class="comment-user">
-          <div class="comment-user-details">
-              <user-avatar small="true"></user-avatar>
-              <div class="user-name"></div>
-          </div>
-          <date-formatted></date-formatted>
-        </div>
-    </div>`;
-
-    const style = document.createElement('style');
-    style.textContent = `
-      .comment-block {
-          max-width: 300px;
-          border-radius: 10px;
-          background-color: #fff;
-          padding:  10px;
-          border: 1px solid #ccc;
-          margin: 10px;
-          min-height: 180px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-    
-        
-
-        .comment-block .comment-text{
-          background-color: #eee;
-          padding: 10px;
-          font-family: fantasy;
-          max-height: 200px;
-          overflow: hidden;
-          cursor: pointer;
-        }
-
-        .comment-block .comment-user{
-          padding: 10px;
-          font-family: arial;
-          background-color: #fff;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .comment-block .comment-user .comment-user-details{
-          display: flex;
-          align-items: center;
-        }
-        user-avatar{
-          margin-right: 10px;
-        }
-
-        .post-button{
-          background-color: #fff;
-          border: 1px solid #ccc;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-        .post-button:hover{
-          background-color: #ccc;
-          border: 1px solid #aaa;
-          border-radius: 8px;
-          color: #fff;
-        }
-
-    `;
-
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#comment-component-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
   connectedCallback() {
-    const shadow = this.shadowRoot;
-
     const id = this.getAttribute('id');
     const comment = cacheComments.getComment(id);
 
+    this.#setText(comment);
+    this.#setDate(comment);
+    this.#setUserAvatar(comment);
+    this.#setUserName(comment);
+    this.#handleClick(comment);
+
     const showPostButton = this.getAttribute('post-btn');
     if (showPostButton) {
-      const postButton = document.createElement('button');
-      postButton.setAttribute('class', 'post-button');
-      postButton.textContent = 'Open post';
-      postButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = routes.Post.reverse({ post: comment.post.id });
-        goTo(url);
-      });
-      const bottomBlock = shadow.querySelector('.bottom-block');
-      bottomBlock.appendChild(postButton);
+      this.#createPostBtn(comment);
     }
+  }
 
-    const text = shadow.querySelector('.comment-text');
+  #setText(comment) {
+    const text = this.shadow.querySelector('.comment__text');
     text.textContent = comment.text;
+  }
 
-    const user = shadow.querySelector('.comment-user');
+  #setDate(comment) {
+    const commentDate = this.shadow.querySelector('date-formatted');
+    commentDate.setAttribute('date', comment.createdAt);
+  }
 
-    const userAvatar = shadow.querySelector('user-avatar');
+  #setUserAvatar(comment) {
+    const userAvatar = this.shadow.querySelector('user-avatar');
     userAvatar.setAttribute('user-name', comment.user.user_name);
-    const userName = shadow.querySelector('.user-name');
-    userName.textContent = comment.user.user_fullname;
+  }
 
-    user.addEventListener('click', (e) => {
-      e.stopPropagation();
+  #setUserName(comment) {
+    const userName = this.shadow.querySelector('.user__name');
+    userName.textContent = comment.user.user_fullname;
+  }
+
+  #handleClick(comment) {
+    const user = this.shadow.querySelector('.user');
+    user.addEventListener('click', (event) => {
+      event.stopPropagation();
       const url = routes.User.reverse({ user: comment.user.id });
       goTo(url);
     });
+  }
 
-    const commentDate = shadow.querySelector('date-formatted');
-    commentDate.setAttribute('date', comment.createdAt);
+  #createPostBtn(comment) {
+    const postButton = document.createElement('button');
+    postButton.setAttribute('class', 'post-button');
+    postButton.textContent = 'Open post';
+
+    const bottomBlock = this.shadow.querySelector('.comment__bottom');
+    bottomBlock.appendChild(postButton);
+
+    postButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const url = routes.Post.reverse({ post: comment.post.id });
+      goTo(url);
+    });
   }
 }
 

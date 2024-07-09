@@ -11,6 +11,475 @@
     <div id="app"></div>
     <script src="/src/index.js" type="module"></script>
 
+    <template id="main-template">
+      <style>
+        .main__wrapper {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 20px;
+          text-align: center;
+        }
+        div[slot] {
+          padding: 20px;
+        }
+        .main__title {
+          text-align: center;
+        }
+        .center-block {
+          display: flex;
+        }
+        .block-left,
+        .block-right {
+          width: 50px;
+        }
+      </style>
+      <div class="main">
+        <div class="main__container">
+          <h2 class="main__title">Main Page</h2>
+          <div class="main__wrapper">
+            <div>
+              <slot name="block-top"></slot>
+
+              <div class="center-block">
+                <slot name="block-left"></slot>
+                <slot name="block-right"></slot>
+              </div>
+
+              <slot name="block-bottom"></slot>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="date-formatted-template">
+      <style>
+        .date-formatted {
+          font-family: arial;
+          font-size: 12px;
+        }
+      </style>
+      <div class="date-formatted"></div>
+    </template>
+
+    <template id="entity-list-template">
+      <style>
+        .entity-list {
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          flex-wrap: wrap;
+          padding: 5px;
+        }
+        .title {
+          text-align: center;
+        }
+        .pagination {
+          display: flex;
+          justify-content: center;
+        }
+      </style>
+      <h2 class="title"></h2>
+      <pagination-component class="pagination"></pagination-component>
+      <div class="entity-list"></div>
+    </template>
+
+    <template id="pagination-component-template">
+      <style>
+        .pagination {
+          display: flex;
+          justify-content: center;
+        }
+        .pagination__label {
+          margin: 0 10px;
+          font-weight: bold;
+          font-family: system-ui;
+        }
+      </style>
+      <div class="pagination">
+        <button class="pagination__btn pagination__btn--prev">Prev</button>
+        <div class="pagination__label"></div>
+        <button class="pagination__btn pagination__btn--next">Next</button>
+      </div>
+    </template>
+
+    <template id="post-detail-template">
+      <style>
+        .post-detail {
+          max-width: 600px;
+          border-radius: 10px;
+          background-color: #ccc;
+          margin: 10px;
+          padding: 10px;
+          margin: auto;
+        }
+        .title {
+          text-align: center;
+        }
+        .post-detail .post-detail__title {
+          padding: 10px;
+          font-weight: bold;
+        }
+        .post-detail .post-detail__text {
+          padding: 10px;
+          font-family: fantasy;
+        }
+        .post-detail .user {
+          padding: 10px;
+          font-family: arial;
+          background-color: #fff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        user-avatar {
+          margin-right: 10px;
+        }
+        .post-detail .user .user__details {
+          display: flex;
+          align-items: center;
+        }
+      </style>
+      <h2 class="title">Post details</h2>
+      <div class="post-detail">
+        <div class="post-detail__title"></div>
+        <div class="post-detail__text"></div>
+        <div class="post-detail__user user">
+          <div class="user__details">
+            <user-avatar small="true"></user-avatar>
+            <div class="user__name"></div>
+          </div>
+          <date-formatted></date-formatted>
+        </div>
+      </div>
+    </template>
+
+    <template id="post-component-template">
+      <style>
+        .post {
+          max-width: 200px;
+          border-radius: 10px;
+          background-color: #ccc;
+          margin: 10px;
+          padding: 10px;
+        }
+        .post .post__title {
+          padding: 10px;
+          font-weight: bold;
+        }
+        .post .post__text {
+          padding: 10px;
+          font-family: fantasy;
+          max-height: 200px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+        .post .user {
+          padding: 10px;
+          font-family: arial;
+          background-color: #fff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+        }
+        .user__avatar {
+          margin-right: 10px;
+        }
+        .highlight {
+          background-color: yellow;
+        }
+      </style>
+      <div class="post">
+        <div class="post__title"></div>
+        <div class="post__text"></div>
+        <div class="post__user user">
+          <user-avatar small="true"></user-avatar>
+          <div class="user__name"></div>
+        </div>
+      </div>
+    </template>
+
+    <template id="user-avatar-template">
+      <style>
+        .user-avatar {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 20px;
+          width: 40px;
+          height: 40px;
+          text-transform: uppercase;
+          font-family: fixed;
+          border-radius: 50%;
+          padding: 16px;
+          background-color: #ccc;
+          color: #ccc;
+          margin-right: 5px;
+        }
+        .user-avatar.small {
+          font-family: arial;
+          font-size: 16px;
+          width: 10px;
+          height: 10px;
+        }
+      </style>
+      <div class="user-avatar">
+        <div class="user-avatar__text"></div>
+      </div>
+    </template>
+
+    <template id="user-component-template">
+      <style>
+        .user {
+          display: flex;
+          justify-content: center;
+        }
+
+        .user__avatar {
+          display: flex;
+        }
+
+        .title {
+          text-align: center;
+        }
+
+        .user__wrapper {
+          max-width: 200px;
+          border-radius: 10px;
+          background-color: #ccc;
+          margin: 10px;
+          padding: 10px;
+        }
+
+        .user__wrapper .user__title {
+          padding: 10px;
+          font-weight: bold;
+        }
+
+        .user__wrapper .user__text {
+          padding: 10px;
+          font-family: fantasy;
+          max-height: 200px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+
+        .user__wrapper .user__buttons {
+          padding: 10px;
+          font-family: arial;
+          display: flex;
+          justify-content: space-around;
+          min-width: 200px;
+        }
+
+        .user__wrapper .user__buttons .user__btn {
+          padding: 10px;
+          background-color: #fff;
+          color: #666;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+
+        .user__wrapper .user__buttons .user__btn:hover {
+          color: #333;
+          background-color: #eee;
+        }
+        .highlight {
+          background-color: yellow;
+        }
+      </style>
+      <h2 class="title"></h2>
+      <div class="user">
+        <div class="user__wrapper">
+          <div class="user__avatar">
+            <user-avatar></user-avatar>
+            <div class="user__title"></div>
+          </div>
+          <div class="user__text"></div>
+          <div class="user__buttons">
+            <div class="user__btn user__btn--posts">Posts</div>
+            <div class="user__btn user__btn--comments">Comments</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="comment-component-template">
+      <style>
+        .comment {
+          max-width: 300px;
+          border-radius: 10px;
+          background-color: #fff;
+          padding: 10px;
+          border: 1px solid #ccc;
+          margin: 10px;
+          min-height: 180px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .comment .comment__text {
+          background-color: #eee;
+          padding: 10px;
+          font-family: fantasy;
+          max-height: 200px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+        .comment .comment__user {
+          padding: 10px;
+          font-family: arial;
+          background-color: #fff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .comment .comment__user .user__details {
+          display: flex;
+          align-items: center;
+        }
+        user-avatar {
+          margin-right: 10px;
+        }
+        .post-button {
+          background-color: #fff;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        .post-button:hover {
+          background-color: #ccc;
+          border: 1px solid #aaa;
+          border-radius: 8px;
+          color: #fff;
+        }
+      </style>
+      <div class="comment">
+        <div class="comment__text"></div>
+        <div class="comment__bottom">
+          <div class="comment__user user">
+            <div class="user__details">
+              <user-avatar small="true"></user-avatar>
+              <div class="user__name"></div>
+            </div>
+            <date-formatted></date-formatted>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="link-component-template">
+      <style>
+        a {
+          padding: 5px;
+          margin: 5px 5px 5px 0;
+          background-color: #ddd;
+          color: #333;
+        }
+        a:hover {
+          background-color: #666;
+          color: #eee;
+          text-decoration: none;
+        }
+      </style>
+      <a>
+        <slot></slot>
+      </a>
+    </template>
+
+    <template id="nav-component-template">
+      <style>
+        .navigation {
+          display: flex;
+          align-items: center;
+          padding: 5px;
+        }
+        .global-search {
+          font-size: 16px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          padding: 4px 20px;
+          width: 100%;
+          margin: 0 50px;
+        }
+        .global-search:placeholder {
+          color: #aaa;
+        }
+      </style>
+      <div class="navigation">
+        <slot name="link"></slot>
+        <input type="text" class="global-search" />
+        <modal-dialog>
+          <div slot="title">Error</div>
+          <div slot="message">Search string must contain at least 2 chars</div>
+        </modal-dialog>
+      </div>
+    </template>
+
+    <template id="fake-form-template">
+      <style>
+        .form {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 20px;
+          text-align: center;
+        }
+        .form__content {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          margin: 10px;
+          font-size: 10px;
+          font-family: arial;
+        }
+        .form__title {
+          text-align: center;
+        }
+        .form input {
+          margin-bottom: 5px;
+        }
+      </style>
+      <div class="form">
+        <form class="form__content">
+          <h4 class="form__title"></h4>
+          <input placeholder="User name" name="text" class="form__input-text" />
+          <input
+            type="password"
+            name="password"
+            placeholder="password"
+            class="form__input-password"
+          />
+          <div class="form__buttons">
+            <button
+              type="submit"
+              class="form__btn form__btn--ok-btn"
+              data-action="ok"
+            >
+              Ok
+            </button>
+            <button
+              type="submit"
+              class="form__btn form__btn--cancel-btn"
+              data-action="cancel"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        <modal-dialog></modal-dialog>
+      </div>
+    </template>
+
     <template id="modal-dialog-template">
       <style>
         .modal-dialog {
@@ -28,11 +497,11 @@
           display: none;
         }
 
-        .modal-dialog.opened {
+        .modal-dialog.open {
           display: flex;
         }
 
-        .modal-dialog-backdrop {
+        .modal-dialog__backdrop {
           width: 100vw;
           height: 100vh;
           position: absolute;
@@ -43,7 +512,7 @@
           background-color: rgba(33, 33, 33, 0.5);
         }
 
-        .modal-dialog-wrapper {
+        .modal-dialog__wrapper {
           border: 1px solid #ccc;
           background-color: #fff;
           overflow: hidden;
@@ -53,39 +522,61 @@
           z-index: 1;
         }
 
-        .modal-dialog-title,
-        .modal-dialog-message,
-        .buttons {
+        .modal-dialog__title,
+        .modal-dialog__message,
+        .modal-dialog__buttons {
           text-align: center;
           padding: 10px;
         }
 
-        .buttons {
+        .modal-dialog__buttons {
           border-top: 1px solid #ccc;
         }
 
-        .cancel-button.hide {
+        .modal-dialog__btn--cancel-btn.hide {
           display: none;
         }
 
-        .modal-dialog-wrapper .modal-dialog-title {
+        .modal-dialog__wrapper .modal-dialog__title {
           background-color: #ccc;
+          color: #fff;
+        }
+        .modal-dialog__wrapper.error .modal-dialog__title {
+          background-color: #f00;
+          color: #fff;
+        }
+        .modal-dialog__wrapper.info .modal-dialog__title {
+          background-color: #00f;
+          color: #fff;
+        }
+        .modal-dialog__wrapper.warning .modal-dialog__title {
+          background-color: #e0cf34;
           color: #fff;
         }
       </style>
       <div class="modal-dialog">
-        <div class="modal-dialog-backdrop"></div>
-        <div class="modal-dialog-wrapper">
-          <div class="modal-dialog-title">
+        <div class="modal-dialog__backdrop" data-action="cancel"></div>
+        <div class="modal-dialog__wrapper">
+          <div class="modal-dialog__title">
             <slot name="title"></slot>
           </div>
-          <div class="modal-dialog-message">
+          <div class="modal-dialog__message">
             <slot name="message"></slot>
           </div>
 
-          <div class="buttons">
-            <button class="ok-button">Ok</button>
-            <button class="cancel-button">Cancel</button>
+          <div class="modal-dialog__buttons">
+            <button
+              class="modal-dialog__btn modal-dialog__btn--ok-btn"
+              data-action="ok"
+            >
+              Ok
+            </button>
+            <button
+              class="modal-dialog__btn modal-dialog__btn--cancel-btn hide"
+              data-action="cancel"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>

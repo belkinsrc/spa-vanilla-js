@@ -18,9 +18,11 @@ const appConstants = {
   },
   lists: {
     types: {
-      post: 'post',
-      user: 'user',
-      comment: 'comment',
+      posts: 'posts',
+      users: 'users',
+      userPosts: 'userPosts',
+      userComments: 'userComments',
+      postComments: 'postComments',
     },
   },
 };

@@ -1,120 +1,102 @@
-import { defaultEvents, dialogTypes } from './modal-dialog';
-
 class FakeForm extends HTMLElement {
   constructor() {
     super();
     this.block = '';
-    const shadow = this.attachShadow({ mode: 'open' });
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('class', 'form-block');
-    wrapper.innerHTML = `
-    <div class="form">
-      <h4 class="title"></h4>
-      <input placeholder="User name" class="input-text">
-      <input type="password" placeholder="password" class="input-password">
-      <div class="buttons">
-          <button class='ok-button'>Ok</button>
-          <button class='cancel-button'>Cancel</button>
-      </div>
-    </div>
-    `;
-
-    const style = document.createElement('style');
-    style.textContent = `
-    .wrapper{
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 20px;
-      text-align: center;
-    }
-    .form{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 10px;
-      border: 1px solid #ccc;
-      
-      border-radius: 8px;
-      margin: 10px;
-      font-size: 10px;
-      font-family: arial;
-    }
-
-    h4{
-        text-align: center;
-    }
-    input{
-      margin-bottom: 5px;
-    }
-    `;
-
-    shadow.appendChild(style);
-    shadow.appendChild(wrapper);
+    this.shadow = this.attachShadow({ mode: 'open' });
+    const template = document.querySelector('#fake-form-template');
+    const content = template.content.cloneNode(true);
+    this.shadow.appendChild(content);
   }
 
   connectedCallback() {
-    const shadow = this.shadowRoot;
-    this.block = this.getAttribute('block');
+    this.#setTitle();
+    this.#handleFormButtonsActions();
+    this.#handleModalDialogActions();
+  }
 
-    const wrapper = shadow.querySelector('.form-block');
-    const title = shadow.querySelector('.title');
+  static get observedAttributes() {
+    return ['block'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'block') {
+      this.block = newValue;
+    }
+  }
+
+  #setTitle() {
+    const title = this.shadow.querySelector('.form__title');
     title.textContent = `Form ${this.block}`;
-    const okButton = shadow.querySelector('.ok-button');
-    const cancelButton = shadow.querySelector('.cancel-button');
+  }
 
-    const inputText = shadow.querySelector('.input-text');
-    const inputPassword = shadow.querySelector('.input-password');
+  #handleFormButtonsActions() {
+    const form = this.shadow.querySelector('.form__content');
 
-    okButton.addEventListener('click', (e) => {
-      const md = shadow.querySelector('modal-dialog');
-      md.innerHTML = `
-      <div slot="title">Information</div>
-      <div slot="message">
-        <div>ok</div>
-        <div>Form ${this.block}</div>
-        <div>Intut text: ${inputText.value}</div>
-        <div>Input password: ${inputPassword.value}</div>
-      </div>
-      `;
+    const okClick = (event) => {
+      const renderData = {
+        title: 'Information',
+        status: 'Ok',
+        dialogType: 'info',
+      };
+      this.#renderModalDialog(event, renderData);
+    };
 
-      md.setAttribute('is-opened', 'true');
-      md.setAttribute('dialog-type', dialogTypes.info);
+    const cancelClick = (event) => {
+      const renderData = {
+        title: 'Warning',
+        status: 'Cancel',
+        dialogType: 'warning',
+      };
+      this.#renderModalDialog(event, renderData);
+    };
+
+    const actions = {
+      ok: okClick,
+      cancel: cancelClick,
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const submitter = event.submitter;
+      const action = submitter.dataset.action;
+      if (action && actions[action]) {
+        actions[action](event);
+      }
     });
+  }
 
-    cancelButton.addEventListener('click', (e) => {
-      const md = shadow.querySelector('modal-dialog');
-      md.innerHTML = `
-      <div slot="title">Warning</div>
-      <div slot="message">
-      <div>Cancel</div>
-        <div>Form ${this.block}</div>
-        <div>Intut text: ${inputText.value}</div>
-        <div>Input password: ${inputPassword.value}</div>
-      </div>
-      `;
-      md.setAttribute('is-opened', 'true');
-      md.setAttribute('dialog-type', dialogTypes.warning);
-    });
+  #handleModalDialogActions() {
+    const modalDialog = this.shadow.querySelector('modal-dialog');
 
-    //adding modal dialog
-    const modalDialog = document.createElement('modal-dialog');
-    modalDialog.innerHTML = ``;
-
-    modalDialog.addEventListener(defaultEvents.okEvent, (event) => {
+    modalDialog.addEventListener('ok-click', (event) => {
       event.stopPropagation();
       alert('It was "Ok" button');
-      modalDialog.setAttribute('is-opened', 'false');
-    });
-    modalDialog.addEventListener(defaultEvents.cancelEvent, (event) => {
-      event.stopPropagation();
-      alert('It was "Cancel" button');
-      modalDialog.setAttribute('is-opened', 'false');
+      modalDialog.setAttribute('open', 'false');
     });
 
-    wrapper.appendChild(modalDialog);
+    modalDialog.addEventListener('cancel-click', (event) => {
+      event.stopPropagation();
+      alert('It was "Cancel" button');
+      modalDialog.setAttribute('open', 'false');
+    });
+  }
+
+  #renderModalDialog(event, renderData) {
+    const { title, status, dialogType } = renderData;
+    const inputText = event.target.elements.text;
+    const inputPassword = event.target.elements.password;
+    const modalDialog = this.shadow.querySelector('modal-dialog');
+    modalDialog.innerHTML = `
+      <div slot="title">${title}</div>
+      <div slot="message">
+      <div>${status}</div>
+        <div>Form ${this.block}</div>
+        <div>Intut text: ${inputText.value}</div>
+        <div>Input password: ${inputPassword.value}</div>
+      </div>
+      `;
+    modalDialog.setAttribute('type', `${dialogType}`);
+    modalDialog.setAttribute('open', 'true');
   }
 }
 
