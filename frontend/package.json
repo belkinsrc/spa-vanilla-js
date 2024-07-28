@@ -2,6 +2,7 @@
   "name": "spa-vanilla-js",
   "private": true,
   "version": "0.0.0",
+  "author": "Nikita Belkin",
   "type": "module",
   "scripts": {
     "dev": "vite",
