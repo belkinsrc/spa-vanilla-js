@@ -56,6 +56,7 @@ class CommentComponent extends HTMLElement {
   }
 
   #createPostBtn(comment) {
+    console.log(comment)
     const postButton = document.createElement('button');
     postButton.setAttribute('class', 'post-button');
     postButton.textContent = 'Open post';

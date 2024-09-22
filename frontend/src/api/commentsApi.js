@@ -8,7 +8,7 @@ export const getCommentsByPost = (postId, page) => {
 
 export const getCommentsByUser = (userId, page) => {
   return baseApi.get(
-    `/users/${userId}/comments?_page=${page}&_limit=10&_expand=user&_expand=post`
+    `/users/${userId}/comments?_page=${page}&_limit=10&_expand=user,post`
   );
 };
 

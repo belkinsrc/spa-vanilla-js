@@ -1,4 +1,4 @@
-const User = require('../models');
+const User = require('../models/user');
 
 function handleError(res, err) {
   res.status(500);
@@ -7,11 +7,11 @@ function handleError(res, err) {
 
 async function getUsers(req, res) {
   try {
-    const { q, page = 1, limit = 10 } = req.query;
-
-    const searchQuery = q ? new RegExp(q, 'i') : null;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + Number(limit);
+    const { _q, _page = 1, _limit = 10 } = req.query;
+    const page = parseInt(_page);
+    const limit = parseInt(_limit);
+    const skip = (page - 1) * limit;
+    const searchQuery = _q ? new RegExp(_q, 'i') : null;
 
     let users;
 
@@ -19,11 +19,11 @@ async function getUsers(req, res) {
       users = await User.find({
         $or: [{ user_name: searchQuery }, { user_fullname: searchQuery }],
       })
-        .skip(startIndex)
-        .limit(endIndex);
+        .skip(skip)
+        .limit(limit);
       res.status(200).json(users);
     } else {
-      users = await User.find().skip(startIndex).limit(endIndex);
+      users = await User.find().skip(skip).limit(limit);
       res.status(200).json(users);
     }
   } catch (err) {

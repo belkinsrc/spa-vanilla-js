@@ -1,87 +1,86 @@
-import { appConstants } from '@/common';
-import { cachePosts, cacheUsers, cacheComments } from '@/service';
-import { postsApi, usersApi, commentsApi } from '@/api';
+import { appConstants } from '@/common'
+import { cachePosts, cacheUsers, cacheComments } from '@/service'
+import { postsApi, usersApi, commentsApi } from '@/api'
 
 class ListComponent extends HTMLElement {
   constructor() {
-    super();
-    this.search = '';
-    this.page = 1;
-    this.lastPage = false;
-    this.typeList = appConstants.lists.types.posts;
+    super()
+    this.search = ''
+    this.page = 1
+    this.lastPage = false
+    this.typeList = appConstants.lists.types.posts
 
-    this.shadow = this.attachShadow({ mode: 'open' });
-    const template = document.querySelector('#entity-list-template');
-    const content = template.content.cloneNode(true);
-    this.shadow.appendChild(content);
+    this.shadow = this.attachShadow({ mode: 'open' })
+    const template = document.querySelector('#entity-list-template')
+    const content = template.content.cloneNode(true)
+    this.shadow.appendChild(content)
   }
 
   connectedCallback() {
-    this.#handlePagination();
-    this.#fetchEntities();
+    this.#handlePagination()
   }
 
   static get observedAttributes() {
-    return ['search', 'type'];
+    return ['search', 'type']
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name, _, newValue) {
     if (name === 'search') {
-      this.#update(newValue);
+      this.#update(newValue)
     }
     if (name === 'type') {
-      this.#setType(newValue);
-      this.#setTitle();
+      this.#setType(newValue)
+      this.#setTitle()
     }
   }
 
   #update(query) {
     if (query) {
-      this.search = query;
+      this.search = query
     }
-    this.#fetchEntities();
+    this.#fetchEntities()
   }
 
   #handlePagination() {
-    const pagination = this.shadow.querySelector('pagination-component');
+    const pagination = this.shadow.querySelector('pagination-component')
 
     pagination.addEventListener('paginate-back', (e) => {
-      e.stopPropagation();
+      e.stopPropagation()
       if (this.page > 1) {
-        this.page = this.page - 1;
-        pagination.setAttribute('page', this.page);
-        this.#fetchEntities();
-      }
-    });
+        this.page -= 1;  // Укороченный синтаксис
+        pagination.setAttribute('page', String(this.page));  // Преобразуем в строку
+        this.#fetchEntities();  // Загружаем новые данные
+      }      
+    })
 
     pagination.addEventListener('paginate-next', (e) => {
-      e.stopPropagation();
+      e.stopPropagation()
       if (!this.lastPage) {
-        this.page = this.page + 1;
-        pagination.setAttribute('page', this.page);
-        this.#fetchEntities();
+        this.page = this.page + 1
+        pagination.setAttribute('page', this.page)
+        this.#fetchEntities()
       }
-    });
+    })
   }
 
   #setTitle() {
-    const title = this.shadow.querySelector('.title');
+    const title = this.shadow.querySelector('.title')
     switch (this.typeList) {
       case appConstants.lists.types.posts:
-        title.textContent = 'All posts';
-        break;
+        title.textContent = 'All posts'
+        break
       case appConstants.lists.types.users:
-        title.textContent = 'All users';
-        break;
+        title.textContent = 'All users'
+        break
       case appConstants.lists.types.userPosts:
-        title.textContent = 'User posts';
-        break;
+        title.textContent = 'User posts'
+        break
       case appConstants.lists.types.userComments:
-        title.textContent = 'User comments';
-        break;
+        title.textContent = 'User comments'
+        break
       case appConstants.lists.types.postComments:
-        title.textContent = 'Post comments';
-        break;
+        title.textContent = 'Post comments'
+        break
     }
   }
 
@@ -89,141 +88,151 @@ class ListComponent extends HTMLElement {
     for (let type in appConstants.lists.types) {
       if (value === type) {
         this.typeList = value;
+        this.page = 1;  // Сбрасываем страницу на первую
       }
     }
-  }
+  
+    if (
+      value === appConstants.lists.types.userPosts ||
+      value === appConstants.lists.types.userComments ||
+      value === appConstants.lists.types.postComments
+    ) {      
+      this.#fetchEntities();
+    }
+  }  
 
   async #fetchEntities() {
-    const api = this.#getEntitiesApi();
+    const api = this.#getEntitiesApi()
 
     if (api) {
       try {
-        const entities = await api;
-        let entityType = '';
-        const entityAttributes = {};
+        const entities = await api
+        let entityType = ''
+        const entityAttributes = {}
         const options = {
           cache: {},
-        };
+        }
 
         switch (this.typeList) {
           case appConstants.lists.types.users:
-            entityType = 'user-component';
-            options.cache.set = cacheUsers.setUser;
+            entityType = 'user-component'
+            options.cache.set = cacheUsers.setUser
 
             if (this.search) {
-              entityAttributes.search = this.search;
+              entityAttributes.search = this.search
             }
-            break;
+            break
           case appConstants.lists.types.posts:
-            entityType = 'post-component';
-            options.cache.set = cachePosts.setPost;
+            entityType = 'post-component'
+            options.cache.set = cachePosts.setPost
 
             if (this.search) {
-              entityAttributes.search = this.search;
+              entityAttributes.search = this.search
             }
-            break;
+            break
           case appConstants.lists.types.userPosts:
-            entityType = 'post-component';
-            options.cache.set = cachePosts.setPost;
+            entityType = 'post-component'
+            options.cache.set = cachePosts.setPost
 
             if (this.search) {
-              entityAttributes.search = this.search;
+              entityAttributes.search = this.search
             }
-            break;
+            break
           case appConstants.lists.types.userComments:
           case appConstants.lists.types.postComments:
-            entityType = 'comment-component';
-            options.cache.set = cacheComments.setComment;
+            entityType = 'comment-component'
+            options.cache.set = cacheComments.setComment
 
             if (this.search) {
-              entityAttributes.search = this.search;
+              entityAttributes.search = this.search
             }
-            const userId = this.getAttribute('user');
+            const userId = this.getAttribute('user')
             if (userId) {
-              entityAttributes['post-btn'] = 'true';
+              entityAttributes['post-btn'] = 'true'
             }
-            break;
+            break
         }
-        this.#render(entities, entityType, entityAttributes, options);
+        this.#render(entities, entityType, entityAttributes, options)
       } catch (error) {
-        console.error(error);
+        console.error(error)
       }
     }
   }
 
   #render(entities, entityType, entityAttributes, options) {
-    const { cache } = options;
+    const { cache } = options
 
-    const pagination = this.shadow.querySelector('pagination-component');
-    const wrapper = this.shadow.querySelector('.entity-list');
-    wrapper.innerHTML = '';
+    const pagination = this.shadow.querySelector('pagination-component')
+    const wrapper = this.shadow.querySelector('.entity-list')
+    wrapper.innerHTML = ''
 
     entities.forEach((entity) => {
-      cache.set(entity);
+      cache.set(entity)
 
       this.lastPage = entities.length < 10;
-      pagination.setAttribute('last', this.lastPage);
+      pagination.setAttribute('last', String(this.lastPage));
 
-      const entityElement = document.createElement(entityType);
-      entityElement.setAttribute('id', entity.id);
-  
+
+      const entityElement = document.createElement(entityType)
+      entityElement.setAttribute('id', entity.id)
+
       for (let attribute in entityAttributes) {
         if (entityAttributes.hasOwnProperty(attribute)) {
-          entityElement.setAttribute(attribute, entityAttributes[attribute]);
+          entityElement.setAttribute(attribute, entityAttributes[attribute])
         }
       }
-      wrapper.appendChild(entityElement);
-    });
+      wrapper.appendChild(entityElement)
+    })
 
     if (entities.length === 0) {
-      wrapper.innerHTML = '<h3>No comments yet</h3>';
+      wrapper.innerHTML = '<h3>No data yet</h3>'
     }
   }
 
   #getEntitiesApi() {
-    const userId = this.getAttribute('user');
-    const postId = this.getAttribute('post');
-    const page = this.page;
-    const search = this.search;
+    const userId = this.getAttribute('user')
+    const postId = this.getAttribute('post')
+    const page = this.page
+    const search = this.search
 
     switch (this.typeList) {
       case appConstants.lists.types.users:
-        return this.#getUsersApi(search, page);
+        return this.#getUsersApi(search, page)
       case appConstants.lists.types.postComments:
       case appConstants.lists.types.userComments:
-        return this.#getCommentsApi(search, userId, postId, page);
+        return this.#getCommentsApi(search, userId, postId, page)
       default:
-        return this.#getPostsApi(search, userId, page);
+        return this.#getPostsApi(search, userId, page)
     }
   }
 
   #getUsersApi(search, page) {
     return search
       ? usersApi.getUsersSearch(search, page)
-      : usersApi.getUsers(page);
+      : usersApi.getUsers(page)
   }
 
   #getPostsApi(search, userId, page) {
     if (search) {
-      return postsApi.getPostsSearch(search, page);
+      return postsApi.getPostsSearch(search, page)
     } else if (userId) {
-      return postsApi.getPostsByUser(userId, page);
+      return postsApi.getPostsByUser(userId, page)
     } else {
-      return postsApi.getPosts(page);
+      return postsApi.getPosts(page)
     }
   }
 
   #getCommentsApi(search, userId, postId, page) {
     if (search) {
-      return commentsApi.getCommentsSearch(search, page);
+      return commentsApi.getCommentsSearch(search, page)
     } else if (userId) {
-      return commentsApi.getCommentsByUser(userId, page);
+      return commentsApi.getCommentsByUser(userId, page)
     } else if (postId) {
-      return commentsApi.getCommentsByPost(postId, page);
+      return commentsApi.getCommentsByPost(postId, page)
     } else {
-      return null;
+      return null
     }
   }
 }
 
-customElements.define('list-component', ListComponent);
+customElements.define('list-component', ListComponent)

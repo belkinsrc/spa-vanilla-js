@@ -20,7 +20,6 @@ class DateFormatted extends HTMLElement {
   }
 
   #update() {
-    console.log('sdfsdf');
     const currentDate = this.getAttribute('date');
     const date = this.shadow.querySelector('.date-formatted');
     date.textContent = appUtils.dateFormat(currentDate);

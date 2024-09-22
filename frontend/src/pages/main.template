@@ -1,6 +1,18 @@
 <style>
     app-component .block{
         padding: 32px;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+    }
+    footer small {
+      font-size: 16px;
+    }
+    footer small a {
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
     }    
 </style>
 
@@ -15,3 +27,7 @@
     <div slot="block-right" class="block">${props.rightBlock || ''}</div>
     <div slot="block-bottom" class="block">${props.bottomBlock || ''}</div>
 </app-component>
+
+<footer>
+  <small>Built with passion by <a href="https://github.com/belkinsrc" target="_blank">Nikita Belkin</a></small>
+</footer>

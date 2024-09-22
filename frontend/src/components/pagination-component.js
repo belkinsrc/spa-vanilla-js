@@ -18,13 +18,13 @@ class Pagination extends HTMLElement {
     return ['page', 'last'];
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name, _, newValue) {
     if (name === 'page') {
-      this.page = JSON.parse(newValue);
+      this.page = Number(newValue);
     }
     if (name === 'last') {
-      this.lastPage = JSON.parse(newValue);
-    }
+      this.lastPage = newValue === 'true';
+    }    
     this.#update();
   }
 

@@ -73,7 +73,7 @@ export const render = (path) => {
 };
 
 export const goTo = (path) => {
-  window.history.pushState({ path }, path, path);
+  window.history.pushState({ path }, '', path);
   render(path);
 };
 
@@ -83,7 +83,7 @@ export const getRouterParams = () => {
 };
 
 const initRouter = () => {
-  window.addEventListener('popstate', (e) => {
+  window.addEventListener('popstate', () => {
     render(new URL(window.location.href).pathname);
   });
   document.querySelectorAll('[href^="/"]').forEach((el) => {
