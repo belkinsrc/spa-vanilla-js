@@ -2,10 +2,9 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
   "scripts": {
-    "start": "node ./src/server.js",
-    "dev": "nodemon ./src/server.js"
+    "start": "node ./src/server.mjs",
+    "dev": "nodemon --exitcrash ./src/server.mjs"
   },
   "keywords": [],
   "author": "Nikita Belkin",
@@ -14,7 +13,8 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "mongodb": "^6.8.0",
-    "mongoose": "^8.5.1"
+    "mongoose": "^8.5.1",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
