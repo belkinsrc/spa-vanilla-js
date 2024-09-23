@@ -1,21 +1,21 @@
 import baseApi from './baseApi';
 
 export const getPosts = (page) => {
-  return baseApi.get(`/posts?_page=${page}&_limit=10&_expand=user`);
+  return baseApi.get(`/api/posts?_page=${page}&_limit=10&_expand=user`);
 };
 
 export const getPostsByUser = (userId, page) => {
   return baseApi.get(
-    `/posts?_userId=${userId}&_page=${page}&_limit=10&_expand=user`
+    `/api/posts?_userId=${userId}&_page=${page}&_limit=10&_expand=user`
   );
 };
 
 export const getPostById = (id) => {
-  return baseApi.get(`/posts/${id}?_expand=user`)
+  return baseApi.get(`/api/posts/${id}?_expand=user`)
 };
 
 export const getPostsSearch = (search, page) => {
-  return baseApi.get(`/posts?_q=${search}&_page=${page}&_limit=10&_expand=user`);
+  return baseApi.get(`/api/posts?_q=${search}&_page=${page}&_limit=10&_expand=user`);
 };
 
 export default {
